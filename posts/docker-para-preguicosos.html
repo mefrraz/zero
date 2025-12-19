@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker para Quem Tem Preguiça de Configurar VMs - zero()</title>
+    <meta name="description" content="Containers são como VMs, mas sem a dor de cabeça. Um guia pragmático para Docker.">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>0</text></svg>">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+    <!-- Prism.js for Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+</head>
+
+<body>
+    <div class="bg-layer">
+        <img src="../assets/1.png" alt="" class="bg-blob blob-1">
+        <img src="../assets/2.png" alt="" class="bg-blob blob-2">
+        <img src="../assets/3.png" alt="" class="bg-blob blob-3">
+    </div>
+
+    <div class="container">
+        <div id="header-placeholder"></div>
+        <script src="../components.js"></script>
+        <script>loadHeader();</script>
+
+
+        <!-- Article Header -->
+        <header class="post-hero">
+            <div class="post-hero-meta">
+                <a href="javascript:history.back()" class="back-link">← Voltar</a>
+                <span class="meta-dot">•</span>
+                <a href="../categories/category-devops.html" class="post-category">Devops</a>
+                <span class="meta-dot">•</span>
+                <span class="post-date">18 Dez 2025</span>
+                <span class="meta-dot">•</span>
+                <span class="reading-time">1 min de leitura</span>
+            </div>
+            <h1 class="post-hero-title">Docker para Quem Tem Preguiça de Configurar VMs</h1>
+            <p class="post-hero-excerpt">Containers são como VMs, mas sem a dor de cabeça. Um guia pragmático para Docker.</p>
+        </header>
+
+        <!-- Article Content -->
+        <main class="article-container">
+            <article class="article-body">
+                <p>Se já passaste horas a configurar máquinas virtuais, só para testar um servidor, o Docker vai mudar a tua vida.</p>
+<h2 id="o-que-sao-containers">O Que São Containers?</h2>
+<p>Imagina uma caixa que contém tudo o que a tua aplicação precisa: código, runtime, bibliotecas, configurações. Agora imagina que essa caixa é <strong>ridiculamente leve</strong> comparada a uma VM.</p>
+<h2 id="instalacao-rapida">Instalação Rápida</h2>
+<pre class="codehilite"><code class="language-bash"># Arch Linux
+sudo pacman -S docker docker-compose
+
+# Iniciar o serviço
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Adicionar user ao grupo
+sudo usermod -aG docker $USER
+</code></pre>
+
+<h2 id="primeiro-container">Primeiro Container</h2>
+<pre class="codehilite"><code class="language-bash"># Testar com Nginx
+docker run -d -p 8080:80 nginx
+
+# Ver no browser: http://localhost:8080
+</code></pre>
+
+<h2 id="docker-compose">Docker Compose</h2>
+<p>O verdadeiro poder vem quando precisas de múltiplos serviços:</p>
+<pre class="codehilite"><code class="language-yaml">version: '3.8'
+services:
+  web:
+    image: nginx
+    ports:
+      - &quot;8080:80&quot;
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: secret
+</code></pre>
+
+<p>Execute com:</p>
+<pre class="codehilite"><code class="language-bash">docker-compose up -d
+</code></pre>
+
+<h2 id="comandos-essenciais">Comandos Essenciais</h2>
+<table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>O Que Faz</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docker ps</code></td>
+<td>Lista containers a correr</td>
+</tr>
+<tr>
+<td><code>docker images</code></td>
+<td>Lista imagens locais</td>
+</tr>
+<tr>
+<td><code>docker stop &lt;id&gt;</code></td>
+<td>Para um container</td>
+</tr>
+<tr>
+<td><code>docker rm &lt;id&gt;</code></td>
+<td>Remove um container</td>
+</tr>
+<tr>
+<td><code>docker system prune</code></td>
+<td>Limpa tudo não usado</td>
+</tr>
+</tbody>
+</table>
+<h2 id="vale-a-pena">Vale a Pena?</h2>
+<p><strong>Sim.</strong> Especialmente se:
+- Desenvolves em equipas (ambientes consistentes)
+- Tens múltiplos projetos com dependências conflituosas
+- Queres testar coisas sem bagunçar o sistema</p>
+<p>Docker é a diferença entre passar uma tarde a configurar, ou 5 minutos a copiar um <code>Dockerfile</code>.</p>
+            </article>
+
+            <!-- Tags -->
+            <div class="post-tags">
+                <span class="tag">docker</span>
+<span class="tag">containers</span>
+<span class="tag">devops</span>
+            </div>
+
+            <!-- Share Section -->
+            <div class="share-section">
+                <span class="share-label">Partilhar:</span>
+                <a href="#" id="shareX" target="_blank" class="share-btn">X</a>
+                <a href="#" id="shareLn" target="_blank" class="share-btn">LinkedIn</a>
+                <button id="mainCopyBtn" class="share-btn share-copy">Copiar Link</button>
+            </div>
+
+            <!-- Post Navigation -->
+            <nav class="post-nav">
+                                <a href="exemplo-completo.html" class="post-nav-link prev">
+                    <span class="nav-label">← Anterior</span>
+                    <span class="nav-title">Guia Completo: Configurar Neovim do Zero</span>
+                </a>                <a href="git-rebase-vs-merge.html" class="post-nav-link next">
+                    <span class="nav-label">Próximo →</span>
+                    <span class="nav-title">Git Rebase vs Merge: A Guerra Que Ninguém Pediu</span>
+                </a>
+            </nav>
+        </main>
+
+        <div id="footer-placeholder"></div>
+        <script>loadFooter();</script>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox-overlay" id="lightbox">
+        <img src="" alt="Zoomed Image" class="lightbox-img" id="lightboxImg">
+    </div>
+
+    <!-- Ghost TOC -->
+    <div class="ghost-toc" id="ghostToc">
+        <h3>Índice</h3>
+        <ul id="tocList"></ul>
+    </div>
+
+    <style>
+        /* === BACK LINK === */
+        .back-link {
+            color: var(--c-text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--c-accent);
+        }
+
+        /* === POST HERO === */
+        .post-hero {
+            padding: 4rem 0 3rem;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 4rem;
+        }
+
+        .post-hero-meta {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .post-category {
+            color: var(--c-text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .post-category:hover {
+            color: var(--c-accent);
+        }
+
+        .meta-dot {
+            color: var(--c-text-sub);
+            opacity: 0.3;
+        }
+
+        .post-date,
+        .reading-time {
+            color: var(--c-text-sub);
+        }
+
+        .post-hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .post-hero-excerpt {
+            font-size: 1.25rem;
+            color: var(--c-text-sub);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        .post-author {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .author-label {
+            color: var(--c-text-sub);
+        }
+
+        .author-name {
+            color: var(--c-text-main);
+            font-weight: 600;
+        }
+
+        /* === ARTICLE BODY === */
+        .article-container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding-bottom: 4rem;
+        }
+
+        .article-body {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: var(--c-text-main);
+        }
+
+        .article-body p {
+            margin-bottom: 1.75rem;
+        }
+
+        .article-body p.lead {
+            font-size: 1.35rem;
+            color: var(--c-text-sub);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .article-body h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 3.5rem;
+            margin-bottom: 1.25rem;
+            color: var(--c-text-main);
+            position: relative;
+            padding-left: 1rem;
+            border-left: 3px solid var(--c-accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-anchor {
+            background: none;
+            border: none;
+            color: var(--c-text-sub);
+            opacity: 0;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            padding: 0.25rem;
+            transition: all 0.2s;
+            order: -1;
+            margin-left: -0.25rem;
+            margin-right: 0.25rem;
+        }
+
+        .article-body h2:hover .header-anchor {
+            opacity: 1;
+        }
+
+        .header-anchor:hover {
+            color: var(--c-accent);
+        }
+
+        /* === IMAGES === */
+        .post-image {
+            margin: 2.5rem 0;
+            text-align: center;
+        }
+
+        .post-image img {
+            max-width: 100%;
+            border-radius: 8px;
+            cursor: zoom-in;
+        }
+
+        .post-image figcaption {
+            font-size: 0.85rem;
+            color: var(--c-text-sub);
+            margin-top: 0.75rem;
+            font-style: italic;
+        }
+
+        /* === BLOCKQUOTE === */
+        .article-body blockquote {
+            border-left: 3px solid var(--c-accent);
+            padding: 1.5rem 2rem;
+            margin: 2.5rem 0;
+            background: var(--c-accent-subtle);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .article-body blockquote p {
+            font-size: 1.2rem;
+            font-style: italic;
+            color: var(--c-text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .article-body blockquote cite {
+            font-size: 0.9rem;
+            color: var(--c-text-sub);
+            font-style: normal;
+        }
+
+        /* === CALLOUT === */
+        .callout {
+            display: flex;
+            gap: 1rem;
+            padding: 1.25rem 1.5rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            background: var(--c-accent-subtle);
+            border: 1px solid var(--c-accent-soft);
+        }
+
+        .callout-icon {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--c-accent);
+            flex-shrink: 0;
+        }
+
+        .callout-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* === CODE === */
+        .article-body code {
+            font-family: var(--font-mono);
+            background: rgba(255, 255, 255, 0.08);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--c-accent);
+        }
+
+        .article-body pre {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .article-body pre code {
+            background: transparent;
+            padding: 0;
+            color: #f8f8f2;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Light mode code blocks - match terminal from /projetos */
+        [data-theme="light"] .article-body pre {
+            background: #f3f4f6 !important;
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .article-body pre[class*="language-"] {
+            background: #f3f4f6 !important;
+        }
+
+        [data-theme="light"] .article-body code {
+            background: rgba(0, 0, 0, 0.08);
+            color: var(--c-accent);
+        }
+
+        [data-theme="light"] .article-body pre code {
+            background: transparent;
+            color: var(--c-text-main);
+        }
+
+        /* Override Prism.js colors for light mode */
+        [data-theme="light"] .token.comment,
+        [data-theme="light"] .token.prolog,
+        [data-theme="light"] .token.doctype,
+        [data-theme="light"] .token.cdata {
+            color: var(--c-text-sub);
+        }
+
+        [data-theme="light"] .token.punctuation {
+            color: var(--c-text-main);
+        }
+
+        [data-theme="light"] .token.property,
+        [data-theme="light"] .token.tag,
+        [data-theme="light"] .token.boolean,
+        [data-theme="light"] .token.number,
+        [data-theme="light"] .token.constant,
+        [data-theme="light"] .token.symbol {
+            color: var(--c-accent);
+        }
+
+        [data-theme="light"] .token.selector,
+        [data-theme="light"] .token.attr-name,
+        [data-theme="light"] .token.string,
+        [data-theme="light"] .token.char,
+        [data-theme="light"] .token.builtin {
+            color: #2e7d32;
+        }
+
+        [data-theme="light"] .token.operator,
+        [data-theme="light"] .token.entity,
+        [data-theme="light"] .token.url,
+        [data-theme="light"] .token.variable {
+            color: var(--c-text-main);
+        }
+
+        [data-theme="light"] .token.atrule,
+        [data-theme="light"] .token.attr-value,
+        [data-theme="light"] .token.function,
+        [data-theme="light"] .token.class-name {
+            color: var(--c-accent);
+            font-weight: 600;
+        }
+
+        [data-theme="light"] .token.keyword {
+            color: #7b1fa2;
+        }
+
+        [data-theme="light"] .token.regex,
+        [data-theme="light"] .token.important {
+            color: #e65100;
+        }
+
+        /* === TAGS === */
+        .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 3rem 0 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] .post-tags {
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--c-text-sub);
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+        }
+
+        [data-theme="light"] .tag {
+            background: #d1d5db;
+            color: var(--c-text-main);
+        }
+
+        /* === SHARE === */
+        .share-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 2rem 0 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] .share-section {
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .share-label {
+            color: var(--c-text-sub);
+            font-size: 0.9rem;
+        }
+
+        .share-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--c-text-sub);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .share-btn:hover {
+            border-color: var(--c-accent);
+            color: var(--c-accent);
+        }
+
+        [data-theme="light"] .share-btn {
+            border: 1px solid rgba(0, 0, 0, 0.15);
+        }
+
+        [data-theme="light"] .share-btn:hover {
+            border-color: var(--c-accent);
+            color: var(--c-accent);
+        }
+
+        /* === POST NAVIGATION === */
+        .post-nav {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] .post-nav {
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .post-nav-link {
+            padding: 1.5rem;
+            background: var(--c-bg-card);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .post-nav-link:hover {
+            border-color: var(--c-accent-soft);
+            transform: translateY(-2px);
+        }
+
+        [data-theme="light"] .post-nav-link {
+            background: transparent;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .post-nav-link:hover {
+            border-color: var(--c-accent);
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .post-nav-link.next {
+            text-align: right;
+        }
+
+        .nav-label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--c-accent);
+            margin-bottom: 0.5rem;
+            font-family: var(--font-mono);
+        }
+
+        .nav-title {
+            display: block;
+            color: var(--c-text-main);
+            font-weight: 600;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .post-hero-title {
+                font-size: 2rem;
+            }
+
+            .post-hero-meta {
+                flex-wrap: wrap;
+            }
+
+            .post-nav {
+                grid-template-columns: 1fr;
+            }
+
+            .post-nav-link.next {
+                text-align: left;
+            }
+        }
+    </style>
+
+    <script>
+        // --- Copy Code Button ---
+        document.querySelectorAll('pre').forEach((pre) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'code-wrapper';
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(pre);
+
+            const button = document.createElement('button');
+            button.className = 'copy-btn';
+            button.innerText = 'Copy';
+            button.addEventListener('click', () => {
+                const code = pre.querySelector('code').innerText;
+                navigator.clipboard.writeText(code);
+                button.innerText = 'Copied!';
+                button.style.color = 'var(--c-accent)';
+                setTimeout(() => {
+                    button.innerText = 'Copy';
+                    button.style.color = '';
+                }, 2000);
+            });
+            wrapper.appendChild(button);
+        });
+
+        // --- Lightbox ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+
+        document.querySelectorAll('.article-body img, .post-image img').forEach(img => {
+            img.addEventListener('click', () => {
+                lightboxImg.src = img.src;
+                lightbox.classList.add('active');
+            });
+        });
+
+        lightbox.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+        });
+
+        // --- Ghost TOC ---
+        const tocList = document.getElementById('tocList');
+        const headers = document.querySelectorAll('.article-body h2');
+        const ghostToc = document.getElementById('ghostToc');
+
+        if (headers.length > 0) {
+            headers.forEach(header => {
+                if (!header.id) {
+                    header.id = header.innerText.toLowerCase()
+                        .replace(/[^\w\s-]/g, '')
+                        .replace(/\s+/g, '-');
+                }
+
+                const li = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = '#' + header.id;
+                link.innerText = header.innerText;
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById(header.id).scrollIntoView({ behavior: 'smooth' });
+                    history.pushState(null, null, '#' + header.id);
+                });
+                li.appendChild(link);
+                tocList.appendChild(li);
+
+                // Add anchor button before header
+                const anchorBtn = document.createElement('button');
+                anchorBtn.className = 'header-anchor';
+                anchorBtn.innerText = '#';
+                anchorBtn.title = 'Copiar link da secção';
+                anchorBtn.onclick = () => {
+                    const url = window.location.origin + window.location.pathname + '#' + header.id;
+                    navigator.clipboard.writeText(url);
+                    anchorBtn.innerText = '✓';
+                    anchorBtn.style.color = 'var(--c-accent)';
+                    setTimeout(() => {
+                        anchorBtn.innerText = '#';
+                        anchorBtn.style.color = '';
+                    }, 1500);
+                };
+                header.prepend(anchorBtn);
+            });
+
+            // Ghost Timer
+            let ghostTimer;
+            function wakeGhost() {
+                ghostToc.classList.add('active-ghost');
+                clearTimeout(ghostTimer);
+            }
+            function sleepGhost() {
+                ghostTimer = setTimeout(() => {
+                    ghostToc.classList.remove('active-ghost');
+                }, 5000);
+            }
+            ghostToc.addEventListener('mouseenter', wakeGhost);
+            ghostToc.addEventListener('mouseleave', sleepGhost);
+            sleepGhost();
+        } else {
+            ghostToc.style.display = 'none';
+        }
+
+        // --- Share Links ---
+        const currentUrl = encodeURIComponent(window.location.href);
+        const currentTitle = encodeURIComponent(document.title);
+        document.getElementById('shareX').href = `https://twitter.com/intent/tweet?text=${currentTitle}&url=${currentUrl}`;
+        document.getElementById('shareLn').href = `https://www.linkedin.com/sharing/share-offsite/?url=${currentUrl}`;
+
+        document.getElementById('mainCopyBtn').addEventListener('click', function () {
+            navigator.clipboard.writeText(window.location.href);
+            this.innerText = 'Copiado!';
+            this.style.borderColor = 'var(--c-accent)';
+            this.style.color = 'var(--c-accent)';
+            setTimeout(() => {
+                this.innerText = 'Copiar Link';
+                this.style.borderColor = '';
+                this.style.color = '';
+            }, 2000);
+        });
+    </script>
+</body>
+
+</html>

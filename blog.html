@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - zero()</title>
+    <meta name="description" content="Todos os posts do blog zero().">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>0</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="bg-layer">
+        <img src="assets/1.png" alt="" class="bg-blob blob-1">
+        <img src="assets/2.png" alt="" class="bg-blob blob-2">
+        <img src="assets/3.png" alt="" class="bg-blob blob-3">
+    </div>
+
+    <div class="container">
+        <div id="header-placeholder"></div>
+        <script src="components.js"></script>
+        <script>loadHeader();</script>
+
+        <!-- Blog Hero -->
+        <section class="blog-hero">
+            <h1>/blog</h1>
+            <p class="blog-subtitle">Tudo o que já escrevi. Organizado por data.</p>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar posts...">
+                <span class="search-icon">⌘K</span>
+            </div>
+        </section>
+
+        <!-- Posts Grid -->
+        <section class="posts-grid blog-grid" id="postsGrid">
+            <article class="post-card" data-title="dotfiles a arte de versionar o teu sistema" data-category="linux git config terminal dotfiles">
+                <div class="post-meta">
+                    <span>19 Dez 2025</span>
+                    <span>•</span>
+                    <span>Linux</span>
+                </div>
+                <a href="posts/dotfiles-versionar-configuracoes.html" class="post-title-link">
+                    <h2 class="post-title">Dotfiles: A Arte de Versionar o Teu Sistema</h2>
+                </a>
+                <p class="post-excerpt">As tuas configurações são código. Trata-as como tal. Um guia completo para gerir dotfiles com Git.</p>
+                <a href="posts/dotfiles-versionar-configuracoes.html" class="read-more">Ler mais →</a>
+            </article>
+            <article class="post-card" data-title="tmux o terminal dentro do terminal" data-category="tools terminal produtividade linux">
+                <div class="post-meta">
+                    <span>19 Dez 2025</span>
+                    <span>•</span>
+                    <span>Tools</span>
+                </div>
+                <a href="posts/tmux-multiplexar-terminal.html" class="post-title-link">
+                    <h2 class="post-title">Tmux: O Terminal Dentro do Terminal</h2>
+                </a>
+                <p class="post-excerpt">Porque é que um terminal não chega. Guia completo do tmux: desde os fundamentos até configurações avançadas.</p>
+                <a href="posts/tmux-multiplexar-terminal.html" class="read-more">Ler mais →</a>
+            </article>
+            <article class="post-card" data-title="o culto da produtividade uma crítica" data-category="vida minimalismo reflexao produtividade">
+                <div class="post-meta">
+                    <span>19 Dez 2025</span>
+                    <span>•</span>
+                    <span>Vida</span>
+                </div>
+                <a href="posts/culto-produtividade-digital.html" class="post-title-link">
+                    <h2 class="post-title">O Culto da Produtividade: Uma Crítica</h2>
+                </a>
+                <p class="post-excerpt">Quando a obsessão por ser produtivo se torna a maior distração. Reflexões sobre a armadilha da optimização infinita.</p>
+                <a href="posts/culto-produtividade-digital.html" class="read-more">Ler mais →</a>
+            </article>
+            <article class="post-card" data-title="como wayland finalmente conquistou o desktop linux" data-category="linux wayland linux desktop">
+                <div class="post-meta">
+                    <span>16 Dez 2025</span>
+                    <span>•</span>
+                    <span>Linux</span>
+                </div>
+                <a href="posts/wayland-conquistou-desktop.html" class="post-title-link">
+                    <h2 class="post-title">Como Wayland Finalmente Conquistou o Desktop Linux</h2>
+                </a>
+                <p class="post-excerpt">Depois de anos de desenvolvimento, o Wayland está pronto para uso diário. Aqui está o porquê.</p>
+                <a href="posts/wayland-conquistou-desktop.html" class="read-more">Ler mais →</a>
+            </article>
+        </section>
+
+        <!-- No Results Message -->
+        <div class="no-results" id="noResults" style="display: none;">
+            <p>Nenhum post encontrado para "<span id="searchTerm"></span>"</p>
+        </div>
+
+        <div id="footer-placeholder"></div>
+        <script>loadFooter();</script>
+    </div>
+
+    <style>
+        .blog-hero {
+            padding: 4rem 0 3rem;
+            text-align: center;
+        }
+
+        .blog-hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--c-text-main) 0%, var(--c-text-sub) 50%, var(--c-accent) 100%);
+            background-size: 150% 150%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 8s ease infinite;
+        }
+
+        .blog-subtitle {
+            font-size: 1.1rem;
+            color: var(--c-text-sub);
+            margin-bottom: 2rem;
+        }
+
+        /* Search */
+        .search-container {
+            max-width: 400px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            padding-right: 4rem;
+            background: var(--c-bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            color: var(--c-text-main);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .search-input::placeholder {
+            color: var(--c-text-sub);
+            opacity: 0.6;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--c-accent-glow);
+            box-shadow: 0 0 0 3px var(--c-accent-soft);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--c-text-sub);
+        }
+
+        /* Blog Grid */
+        .blog-grid {
+            grid-template-columns: repeat(3, 1fr);
+            margin-bottom: 4rem;
+        }
+
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 4rem 0;
+            color: var(--c-text-sub);
+        }
+
+        .no-results span {
+            color: var(--c-accent);
+        }
+
+        @media (max-width: 1024px) {
+            .blog-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .blog-hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .blog-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const postsGrid = document.getElementById('postsGrid');
+        const posts = postsGrid.querySelectorAll('.post-card');
+        const noResults = document.getElementById('noResults');
+        const searchTerm = document.getElementById('searchTerm');
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            posts.forEach(post => {
+                const title = post.dataset.title || '';
+                const category = post.dataset.category || '';
+                const matches = title.includes(query) || category.includes(query);
+
+                post.style.display = matches ? '' : 'none';
+                if (matches) visibleCount++;
+            });
+
+            if (visibleCount === 0 && query) {
+                noResults.style.display = 'block';
+                searchTerm.textContent = query;
+            } else {
+                noResults.style.display = 'none';
+            }
+        });
+
+        // Keyboard shortcut
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                searchInput.focus();
+            }
+        });
+    </script>
+</body>
+
+</html>

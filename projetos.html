@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>zero() - Projetos</title>
+    <meta name="description" content="Projetos e repositórios open source.">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>0</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="bg-layer">
+        <img src="assets/1.png" alt="" class="bg-blob blob-1">
+        <img src="assets/2.png" alt="" class="bg-blob blob-2">
+        <img src="assets/3.png" alt="" class="bg-blob blob-3">
+    </div>
+
+    <div class="container">
+        <div id="header-placeholder"></div>
+        <script src="components.js"></script>
+        <script>loadHeader();</script>
+
+        <!-- HERO WITH TITLE + TERMINAL -->
+        <section class="projects-hero">
+            <h1>/projetos</h1>
+            <p class="hero-subtitle">O código é a documentação. Open source, sempre.</p>
+
+            <div class="hero-terminal">
+                <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">~/mefrraz/repos</span>
+                </div>
+                <div class="terminal-body">
+                    <p class="terminal-line"><span class="prompt">$</span> <span class="cmd">git clone</span> <span
+                            class="url">github.com/mefrraz/*</span></p>
+                    <p class="terminal-line output">Cloning into 'workspace'...</p>
+                    <p class="terminal-line output">Receiving objects: <span id="repo-count">...</span> repos</p>
+                    <p class="terminal-line"><span class="prompt">$</span> <span class="cmd">ls</span> -la</p>
+                    <p class="terminal-line output">total <span id="repo-count-2">...</span></p>
+                    <p class="terminal-line"><span class="prompt">$</span> <span class="cursor">_</span></p>
+                </div>
+            </div>
+        </section>
+
+        <div id="repos-loader" class="loader-container">
+            <div class="loader-spinner"></div>
+            <span>A sincronizar com GitHub...</span>
+        </div>
+
+        <div id="featured-container"></div>
+
+        <div class="section-header" id="other-title" style="display: none;">
+            <div class="section-line"></div>
+            <h3>Outros Projetos</h3>
+            <div class="section-line"></div>
+        </div>
+
+        <div class="projects-accordion" id="repos-accordion"></div>
+
+        <div id="footer-placeholder"></div>
+        <script>loadFooter();</script>
+    </div>
+
+    <style>
+        /* === HERO WITH TITLE + TERMINAL === */
+        .projects-hero {
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .projects-hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+            /* Smaller animation for shorter title */
+            background: linear-gradient(135deg, var(--c-text-main) 0%, var(--c-text-sub) 50%, var(--c-accent) 100%);
+            background-size: 150% 150%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 8s ease infinite;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--c-text-sub);
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-terminal {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            max-width: 550px;
+            margin: 0 auto;
+            text-align: left;
+            box-shadow:
+                0 25px 50px rgba(0, 0, 0, 0.5),
+                0 0 0 1px var(--c-accent-soft),
+                0 0 60px var(--c-accent-subtle);
+        }
+
+        .terminal-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red {
+            background: #ff5f56;
+        }
+
+        .terminal-dot.yellow {
+            background: #ffbd2e;
+        }
+
+        .terminal-dot.green {
+            background: #27ca40;
+        }
+
+        .terminal-title {
+            margin-left: auto;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--c-text-sub);
+        }
+
+        .terminal-body {
+            padding: 1.5rem;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .terminal-line {
+            margin: 0;
+        }
+
+        .prompt {
+            color: var(--c-accent);
+        }
+
+        .cmd {
+            color: #fff;
+        }
+
+        .url {
+            color: #87ceeb;
+        }
+
+        .output {
+            color: var(--c-text-sub);
+        }
+
+        /* Light mode terminal colors */
+        [data-theme="light"] .cmd {
+            color: var(--c-accent);
+            font-weight: 600;
+        }
+
+        [data-theme="light"] .url {
+            color: var(--c-text-main);
+        }
+
+        [data-theme="light"] .prompt {
+            color: var(--c-text-sub);
+        }
+
+        .cursor {
+            color: var(--c-accent);
+            animation: blink 1s infinite;
+        }
+
+        /* === LOADER === */
+        .loader-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem;
+            color: var(--c-text-sub);
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        .loader-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--c-accent-soft);
+            border-top-color: var(--c-accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* === SECTION HEADER === */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin: 3rem 0 2rem;
+        }
+
+        .section-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--c-text-sub);
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .section-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--c-accent-glow), transparent);
+        }
+
+        .section-line:last-child {
+            background: linear-gradient(90deg, transparent, var(--c-accent-glow));
+        }
+
+        /* === LANGUAGE DOTS === */
+        .lang-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 6px currentColor;
+        }
+
+        .lang-JavaScript {
+            background: #f1e05a;
+            box-shadow: 0 0 6px #f1e05a;
+        }
+
+        .lang-TypeScript {
+            background: #3178c6;
+            box-shadow: 0 0 6px #3178c6;
+        }
+
+        .lang-Python {
+            background: #3572A5;
+            box-shadow: 0 0 6px #3572A5;
+        }
+
+        .lang-Shell {
+            background: #89e051;
+            box-shadow: 0 0 6px #89e051;
+        }
+
+        .lang-HTML {
+            background: #e34c26;
+            box-shadow: 0 0 6px #e34c26;
+        }
+
+        .lang-CSS {
+            background: #563d7c;
+            box-shadow: 0 0 6px #563d7c;
+        }
+
+        .lang-Rust {
+            background: #dea584;
+            box-shadow: 0 0 6px #dea584;
+        }
+
+        .lang-Go {
+            background: #00ADD8;
+            box-shadow: 0 0 6px #00ADD8;
+        }
+
+        .lang-default {
+            background: var(--c-text-sub);
+        }
+
+        /* === ACCORDION === */
+        .projects-accordion {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding-bottom: 4rem;
+        }
+
+        .project-accordion-item {
+            background: var(--c-bg-card);
+            border-radius: var(--radius-lg);
+            border: 2px solid transparent;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            /* Staggered entrance animation */
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideIn 0.4s ease forwards;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .project-accordion-item:hover {
+            border-color: var(--c-accent-soft);
+            box-shadow:
+                0 10px 40px rgba(0, 0, 0, 0.3),
+                0 0 20px var(--c-accent-subtle);
+            transform: translateX(8px);
+        }
+
+        /* Header */
+        .project-acc-header {
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .project-accordion-item:hover .project-acc-header {
+            background: var(--c-accent-subtle);
+        }
+
+        .project-acc-title {
+            font-family: var(--font-main);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--c-text-main);
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .project-accordion-item:hover .project-acc-title {
+            color: var(--c-accent);
+            text-shadow: 0 0 20px var(--c-accent-glow);
+        }
+
+        .project-acc-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: var(--c-text-sub);
+            font-family: var(--font-mono);
+        }
+
+        .project-acc-stars {
+            color: var(--c-accent);
+        }
+
+        .project-acc-arrow {
+            font-size: 0.65rem;
+            color: var(--c-text-sub);
+            transition: all 0.3s ease;
+            margin-left: 0.5rem;
+        }
+
+        .project-accordion-item:hover .project-acc-arrow {
+            transform: rotate(90deg);
+            color: var(--c-accent);
+        }
+
+        /* Content */
+        .project-acc-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0 1.5rem;
+            border-top: 0 solid var(--c-accent-soft);
+        }
+
+        .project-accordion-item:hover .project-acc-content {
+            max-height: 200px;
+            opacity: 1;
+            padding: 1rem 1.5rem 1.25rem;
+            border-top-width: 1px;
+        }
+
+        .project-acc-desc {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--c-text-sub);
+            margin-bottom: 1rem;
+        }
+
+        .project-acc-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--c-accent);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: all 0.3s ease 0.1s;
+        }
+
+        .project-accordion-item:hover .project-acc-link {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .project-acc-link:hover {
+            text-shadow: 0 0 10px var(--c-accent);
+        }
+
+        /* Featured card adjustments */
+        #featured-container {
+            margin-bottom: 2rem;
+        }
+
+        /* Light mode terminal */
+        [data-theme="light"] .hero-terminal {
+            background: var(--c-bg-card);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .terminal-header {
+            background: rgba(0, 0, 0, 0.05);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .terminal-body {
+            color: var(--c-text-main);
+        }
+
+        [data-theme="light"] .terminal-line .output {
+            color: var(--c-text-sub);
+        }
+
+        @media (max-width: 768px) {
+            .projects-hero {
+                flex-direction: column;
+                gap: 2rem;
+                text-align: center;
+            }
+
+            .projects-hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-terminal {
+                max-width: 100%;
+            }
+
+            .project-acc-meta span:first-child {
+                display: none;
+            }
+        }
+    </style>
+
+    <script>
+        const username = 'mefrraz';
+        const featuredNames = ['git-snap', 'archdate', 'debdate', 'feddate', 'linuxdate'];
+
+        async function fetchRepos() {
+            try {
+                const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=100`);
+                if (!response.ok) throw new Error('GitHub API Error');
+
+                const data = await response.json();
+
+                // Update terminal with repo count
+                const repoCount = data.filter(r => !r.fork).length;
+                document.getElementById('repo-count').textContent = repoCount;
+                document.getElementById('repo-count-2').textContent = repoCount;
+
+                // Hide loader
+                document.getElementById('repos-loader').style.display = 'none';
+
+                const featuredContainer = document.getElementById('featured-container');
+                const listContainer = document.getElementById('repos-accordion');
+                const otherTitle = document.getElementById('other-title');
+
+                const featured = data.find(repo => repo.name.toLowerCase() === 'git-snap') ||
+                    data.find(repo => featuredNames.some(name => repo.name.toLowerCase() === name.toLowerCase()));
+
+                // Featured card
+                if (featured) {
+                    const langClass = featured.language ? `lang-${featured.language.replace(/\s+/g, '')}` : 'lang-default';
+                    featuredContainer.innerHTML = `
+                        <section class="featured-section" style="position: relative;">
+                            <img src="assets/2.png" alt="" class="featured-blob">
+                            <article class="post-card featured">
+                                <div class="post-content">
+                                    <div class="post-meta">
+                                        <span style="color: var(--c-accent)">★ Destaque</span>
+                                        <span>•</span>
+                                        <span><span class="lang-dot ${langClass}"></span>${featured.language || 'Code'}</span>
+                                        <span>•</span>
+                                        <span>${featured.stargazers_count} ★</span>
+                                    </div>
+                                    <h2 class="post-title">
+                                        <a href="${featured.html_url}" target="_blank" class="post-title-link">${featured.name}</a>
+                                    </h2>
+                                    <p class="post-excerpt" style="font-size: 1.05rem; margin-top: 1rem;">${featured.description || 'Um projeto especial.'}</p>
+                                    <a href="${featured.html_url}" target="_blank" class="read-more">Ver no GitHub →</a>
+                                </div>
+                            </article>
+                        </section>
+                    `;
+                }
+
+                const otherRepos = data.filter(repo => {
+                    if (repo.fork) return false;
+                    if (featured && repo.id === featured.id) return false;
+                    return true;
+                });
+
+                if (otherRepos.length > 0) otherTitle.style.display = 'flex';
+
+                // Accordion items with staggered animation
+                otherRepos.forEach((repo, index) => {
+                    const langClass = repo.language ? `lang-${repo.language.replace(/\s+/g, '')}` : 'lang-default';
+                    const item = document.createElement('div');
+                    item.className = 'project-accordion-item';
+                    item.style.animationDelay = `${index * 0.05}s`;
+                    item.innerHTML = `
+                        <div class="project-acc-header">
+                            <span class="project-acc-title">
+                                <span class="lang-dot ${langClass}"></span>
+                                ${repo.name}
+                            </span>
+                            <div class="project-acc-meta">
+                                <span>${repo.language || 'Code'}</span>
+                                <span class="project-acc-stars">${repo.stargazers_count} ★</span>
+                                <span class="project-acc-arrow">▶</span>
+                            </div>
+                        </div>
+                        <div class="project-acc-content">
+                            <p class="project-acc-desc">${repo.description || 'Sem descrição disponível.'}</p>
+                            <a href="${repo.html_url}" target="_blank" class="project-acc-link">Ver repositório →</a>
+                        </div>
+                    `;
+                    listContainer.appendChild(item);
+                });
+
+            } catch (error) {
+                document.getElementById('repos-loader').innerHTML = '<span style="color: #ef4444;">Erro ao carregar repositórios.</span>';
+                console.error(error);
+            }
+        }
+
+        fetchRepos();
+    </script>
+</body>
+
+</html>

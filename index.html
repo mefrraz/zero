@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>zero() - Home</title>
+    <meta name="description"
+        content="Um blog sobre código, vida e o vácuo entre os dois. Tecnologia com opinião, histórias pessoais e zero% de chatice.">
+    <meta name="author" content="mefrraz">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="zero() - Onde tudo começa">
+    <meta property="og:description" content="Um blog sobre código, vida e o vácuo entre os dois.">
+    <meta property="og:site_name" content="zero()">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Favicon -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>0</text></svg>">
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- Static PNG Background Ambience (Scattered) -->
+    <div class="bg-layer bg-layer-home">
+        <img src="assets/1.png" alt="" class="bg-blob blob-1">
+        <img src="assets/2.png" alt="" class="bg-blob blob-2">
+        <img src="assets/3.png" alt="" class="bg-blob blob-3">
+        <img src="assets/1.png" alt="" class="bg-blob blob-4">
+        <img src="assets/2.png" alt="" class="bg-blob blob-5">
+        <img src="assets/3.png" alt="" class="bg-blob blob-6">
+    </div>
+
+    <div class="container">
+        <!-- Header (Injected via components.js) -->
+        <div id="header-placeholder"></div>
+        <script src="components.js"></script>
+        <script>loadHeader();</script>
+
+        <!-- Hero -->
+        <section class="hero">
+            <h1>Onde tudo começa.<br>E nada termina.</h1>
+            <p class="typewriter-cursor">Um blog sobre código, vida e o vácuo entre os dois. Tecnologia com opinião,
+                histórias pessoais e zero% de
+                chatice.</p>
+        </section>
+
+        <!-- Featured Post (Highlight) -->
+                                                                                                                                                                                                        <section class="featured-section" style="margin-bottom: 4rem; position: relative;">
+            <img src="assets/2.png" alt="" class="featured-blob">
+            <article class="post-card featured">
+                <div class="post-content">
+                    <div class="post-meta">
+                        <span style="color: var(--c-accent)">★ Destaque</span>
+                        <span>•</span>
+                        <span>16 Dez 2025</span>
+                    </div>
+                    <a href="posts/wayland-conquistou-desktop.html" class="post-title-link">
+                        <h2 class="post-title">Como Wayland Finalmente Conquistou o Desktop Linux</h2>
+                    </a>
+                    <p class="post-excerpt" style="font-size: 1.1rem;">Depois de anos de desenvolvimento, o Wayland está pronto para uso diário. Aqui está o porquê.</p>
+                    <a href="posts/wayland-conquistou-desktop.html" class="read-more">Ler artigo completo →</a>
+                </div>
+            </article>
+        </section>
+
+
+
+
+
+        <h3 style="margin-bottom: 2rem; font-size: 1.5rem;">Posts Recentes</h3>
+
+        <!-- Posts Grid -->
+        <section class="posts-grid">
+            <article class="post-card">
+                <div class="post-meta">
+                    <span>19 Dez 2025</span>
+                    <span>•</span>
+                    <span>Linux</span>
+                </div>
+                <a href="posts/dotfiles-versionar-configuracoes.html" class="post-title-link">
+                    <h2 class="post-title">Dotfiles: A Arte de Versionar o Teu Sistema</h2>
+                </a>
+                <p class="post-excerpt">As tuas configurações são código. Trata-as como tal. Um guia completo para gerir dotfiles com Git.</p>
+                <a href="posts/dotfiles-versionar-configuracoes.html" class="read-more">Ler mais →</a>
+            </article>
+            <article class="post-card">
+                <div class="post-meta">
+                    <span>19 Dez 2025</span>
+                    <span>•</span>
+                    <span>Tools</span>
+                </div>
+                <a href="posts/tmux-multiplexar-terminal.html" class="post-title-link">
+                    <h2 class="post-title">Tmux: O Terminal Dentro do Terminal</h2>
+                </a>
+                <p class="post-excerpt">Porque é que um terminal não chega. Guia completo do tmux: desde os fundamentos até configurações avançadas.</p>
+                <a href="posts/tmux-multiplexar-terminal.html" class="read-more">Ler mais →</a>
+            </article>
+            <article class="post-card">
+                <div class="post-meta">
+                    <span>19 Dez 2025</span>
+                    <span>•</span>
+                    <span>Vida</span>
+                </div>
+                <a href="posts/culto-produtividade-digital.html" class="post-title-link">
+                    <h2 class="post-title">O Culto da Produtividade: Uma Crítica</h2>
+                </a>
+                <p class="post-excerpt">Quando a obsessão por ser produtivo se torna a maior distração. Reflexões sobre a armadilha da optimização infinita.</p>
+                <a href="posts/culto-produtividade-digital.html" class="read-more">Ler mais →</a>
+            </article>
+                </section>
+
+        <!-- Footer (Injected via components.js) -->
+        <div id="footer-placeholder"></div>
+        <script>loadFooter();</script>
+    </div>
+</body>
+
+</html>

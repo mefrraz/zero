@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux - zero()</title>
+    <meta name="description" content="Tutoriais sobre Linux, distribuições, configs e tudo relacionado com o pinguim.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>0</text></svg>">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="bg-layer">
+        <img src="../assets/1.png" alt="" class="bg-blob blob-1">
+        <img src="../assets/2.png" alt="" class="bg-blob blob-2">
+        <img src="../assets/3.png" alt="" class="bg-blob blob-3">
+    </div>
+
+    <div class="container">
+        <div id="header-placeholder"></div>
+        <script src="../components.js"></script>
+        <script>loadHeader();</script>
+
+        <!-- Category Hero -->
+        <section class="category-hero">
+            <h1>/linux</h1>
+            <p>Tutoriais sobre Linux, distribuições, configs e tudo relacionado com o pinguim.</p>
+            <div class="category-stats">
+                <span class="stat"><strong>2</strong> posts</span>
+                <span class="stat-dot">•</span>
+                <span class="stat">Última atualização: 19 Dez 2025</span>
+            </div>
+        </section>
+
+        <!-- Posts Grid -->
+        <section class="posts-grid">
+            <article class="post-card">
+                <div class="post-meta">
+                    <span>19 Dez 2025</span>
+                    <span>•</span>
+                    <span>Linux</span>
+                </div>
+                <a href="../posts/dotfiles-versionar-configuracoes.html" class="post-title-link">
+                    <h2 class="post-title">Dotfiles: A Arte de Versionar o Teu Sistema</h2>
+                </a>
+                <p class="post-excerpt">As tuas configurações são código. Trata-as como tal. Um guia completo para gerir dotfiles com Git.</p>
+                <a href="../posts/dotfiles-versionar-configuracoes.html" class="read-more">Ler mais →</a>
+            </article>
+            <article class="post-card">
+                <div class="post-meta">
+                    <span>16 Dez 2025</span>
+                    <span>•</span>
+                    <span>Linux</span>
+                </div>
+                <a href="../posts/wayland-conquistou-desktop.html" class="post-title-link">
+                    <h2 class="post-title">Como Wayland Finalmente Conquistou o Desktop Linux</h2>
+                </a>
+                <p class="post-excerpt">Depois de anos de desenvolvimento, o Wayland está pronto para uso diário. Aqui está o porquê.</p>
+                <a href="../posts/wayland-conquistou-desktop.html" class="read-more">Ler mais →</a>
+            </article>
+        </section>
+
+        <div id="footer-placeholder"></div>
+        <script>loadFooter();</script>
+    </div>
+
+    <style>
+        .category-hero {
+            padding: 4rem 0 3rem;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .category-hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--c-text-main) 0%, var(--c-text-sub) 50%, var(--c-accent) 100%);
+            background-size: 150% 150%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 8s ease infinite;
+        }
+        .category-hero p {
+            font-size: 1.15rem;
+            color: var(--c-text-sub);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+        .category-stats {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--c-text-sub);
+        }
+        .category-stats strong {
+            color: var(--c-accent);
+        }
+        .stat-dot {
+            opacity: 0.3;
+        }
+        @media (max-width: 768px) {
+            .category-hero h1 {
+                font-size: 2.5rem;
+            }
+            .category-stats {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .stat-dot {
+                display: none;
+            }
+        }
+    </style>
+</body>
+</html>

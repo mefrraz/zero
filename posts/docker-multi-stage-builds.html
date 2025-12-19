@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Multi-Stage Builds: Porque o Peso Importa - zero()</title>
+    <meta name="description" content="Imagens de 1GB para uma API simples? Multi-stage builds são a solução que devias estar a usar.">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>0</text></svg>">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+    <!-- Prism.js for Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+</head>
+
+<body>
+    <div class="bg-layer">
+        <img src="../assets/1.png" alt="" class="bg-blob blob-1">
+        <img src="../assets/2.png" alt="" class="bg-blob blob-2">
+        <img src="../assets/3.png" alt="" class="bg-blob blob-3">
+    </div>
+
+    <div class="container">
+        <div id="header-placeholder"></div>
+        <script src="../components.js"></script>
+        <script>loadHeader();</script>
+
+
+        <!-- Article Header -->
+        <header class="post-hero">
+            <div class="post-hero-meta">
+                <a href="javascript:history.back()" class="back-link">← Voltar</a>
+                <span class="meta-dot">•</span>
+                <a href="../categories/category-devops.html" class="post-category">Devops</a>
+                <span class="meta-dot">•</span>
+                <span class="post-date">19 Dez 2025</span>
+                <span class="meta-dot">•</span>
+                <span class="reading-time">4 min de leitura</span>
+            </div>
+            <h1 class="post-hero-title">Docker Multi-Stage Builds: Porque o Peso Importa</h1>
+            <p class="post-hero-excerpt">Imagens de 1GB para uma API simples? Multi-stage builds são a solução que devias estar a usar.</p>
+        </header>
+
+        <!-- Article Content -->
+        <main class="article-container">
+            <article class="article-body">
+                <p>Já viste imagens Docker de 1GB para aplicações que ocupam 50MB? Eu também. E é um problema maior do que parece.</p>
+<p>Imagens pesadas significam deploys lentos, mais custos de storage, e superfícies de ataque maiores. A solução existe há anos, mas continua subutilizada: <strong>multi-stage builds</strong>.</p>
+<h2 id="o-problema-uma-imagem-tudo-incluido">O Problema: Uma Imagem, Tudo Incluído</h2>
+<p>Considera este Dockerfile típico para uma aplicação Python:</p>
+<pre class="codehilite"><code class="language-dockerfile">FROM python:3.12
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY . .
+
+CMD [&quot;python&quot;, &quot;app.py&quot;]
+</code></pre>
+
+<p>Parece inofensivo. Mas vamos ver o tamanho:</p>
+<pre class="codehilite"><code class="language-bash">docker build -t minha-app .
+docker images minha-app
+# REPOSITORY   TAG       SIZE
+# minha-app    latest    1.2GB
+</code></pre>
+
+<p><strong>1.2GB</strong> para uma aplicação que, provavelmente, tem menos de 10MB de código.</p>
+<p>O problema é que a imagem <code>python:3.12</code> inclui tudo: compiladores, headers, ferramentas de build — coisas que precisas para <em>instalar</em> dependências, mas não para <em>executar</em> a aplicação.</p>
+<h2 id="a-solucao-multi-stage-builds">A Solução: Multi-Stage Builds</h2>
+<p>Multi-stage builds permitem-te usar múltiplos <code>FROM</code> no mesmo Dockerfile. Constróis num ambiente completo, mas copias apenas o necessário para a imagem final.</p>
+<pre class="codehilite"><code class="language-dockerfile"># Stage 1: Build
+FROM python:3.12 AS builder
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --user -r requirements.txt
+
+# Stage 2: Runtime
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Copiar apenas as dependências instaladas
+COPY --from=builder /root/.local /root/.local
+COPY . .
+
+ENV PATH=/root/.local/bin:$PATH
+
+CMD [&quot;python&quot;, &quot;app.py&quot;]
+</code></pre>
+
+<p>Resultado:</p>
+<pre class="codehilite"><code class="language-bash">docker images minha-app
+# REPOSITORY   TAG       SIZE
+# minha-app    latest    187MB
+</code></pre>
+
+<p>De <strong>1.2GB para 187MB</strong>. Uma redução de 85%.</p>
+<h2 id="anatomia-de-um-multi-stage-build">Anatomia de um Multi-Stage Build</h2>
+<p>Vamos dissecar o que acontece:</p>
+<pre class="codehilite"><code class="language-dockerfile"># Primeiro stage: nome arbitrário 'builder'
+FROM python:3.12 AS builder
+</code></pre>
+
+<p>O <code>AS builder</code> dá um nome ao stage. Podes ter quantos stages quiseres.</p>
+<pre class="codehilite"><code class="language-dockerfile"># Segundo stage: imagem final
+FROM python:3.12-slim
+</code></pre>
+
+<p>Este é o stage final. Só o que está aqui vai para a imagem resultante.</p>
+<pre class="codehilite"><code class="language-dockerfile"># A magia: copiar de outro stage
+COPY --from=builder /root/.local /root/.local
+</code></pre>
+
+<p>O <code>--from=builder</code> permite copiar ficheiros de stages anteriores. Tudo o resto do builder é descartado.</p>
+<div class="callout">
+    <div class="callout-icon">&gt;</div>
+    <div class="callout-content">
+        <strong>Nota:</strong> Podes também copiar de imagens externas: <code>COPY --from=nginx:alpine /etc/nginx /etc/nginx</code>
+    </div>
+</div>
+
+<h2 id="exemplo-pratico-nodejs">Exemplo Prático: Node.js</h2>
+<p>O JavaScript tem o mesmo problema. <code>node_modules</code> para build vs runtime:</p>
+<pre class="codehilite"><code class="language-dockerfile"># Stage 1: Build
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+# Stage 2: Runtime
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Só precisamos dos artefactos de build
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+
+ENV NODE_ENV=production
+CMD [&quot;node&quot;, &quot;dist/index.js&quot;]
+</code></pre>
+
+<p>Para uma aplicação React ou Next.js, podes ir ainda mais longe com um servidor estático:</p>
+<pre class="codehilite"><code class="language-dockerfile"># Stage 1: Build
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Stage 2: Servir ficheiros estáticos
+FROM nginx:alpine
+COPY --from=builder /app/build /usr/share/nginx/html
+</code></pre>
+
+<p>Resultado típico: de 1GB+ para menos de 50MB.</p>
+<h2 id="comparacao-de-tamanhos">Comparação de Tamanhos</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Aplicação</th>
+<th style="text-align: left;">Sem Multi-Stage</th>
+<th style="text-align: left;">Com Multi-Stage</th>
+<th style="text-align: left;">Redução</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Python API</td>
+<td style="text-align: left;">1.2GB</td>
+<td style="text-align: left;">187MB</td>
+<td style="text-align: left;">85%</td>
+</tr>
+<tr>
+<td style="text-align: left;">Node.js API</td>
+<td style="text-align: left;">1.1GB</td>
+<td style="text-align: left;">210MB</td>
+<td style="text-align: left;">81%</td>
+</tr>
+<tr>
+<td style="text-align: left;">React SPA</td>
+<td style="text-align: left;">1.4GB</td>
+<td style="text-align: left;">43MB</td>
+<td style="text-align: left;">97%</td>
+</tr>
+<tr>
+<td style="text-align: left;">Go Binary</td>
+<td style="text-align: left;">850MB</td>
+<td style="text-align: left;">12MB</td>
+<td style="text-align: left;">99%</td>
+</tr>
+</tbody>
+</table>
+<p>O Go é particularmente impressionante porque compila para binários estáticos:</p>
+<pre class="codehilite"><code class="language-dockerfile"># Build
+FROM golang:1.21 AS builder
+WORKDIR /app
+COPY . .
+RUN CGO_ENABLED=0 go build -o main .
+
+# Runtime: scratch é uma imagem vazia
+FROM scratch
+COPY --from=builder /app/main /main
+CMD [&quot;/main&quot;]
+</code></pre>
+
+<p>12MB. A imagem contém literalmente apenas o binário.</p>
+<h2 id="padroes-avancados">Padrões Avançados</h2>
+<h3 id="stages-paralelos-para-testes">Stages Paralelos Para Testes</h3>
+<pre class="codehilite"><code class="language-dockerfile">FROM node:20-alpine AS base
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+
+FROM base AS test
+COPY . .
+RUN npm run test
+
+FROM base AS build
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+</code></pre>
+
+<p>O stage de testes não afecta a imagem final, mas falha o build se os testes falharem.</p>
+<h3 id="cache-inteligente">Cache Inteligente</h3>
+<p>Ordena os <code>COPY</code> do menos para o mais frequentemente alterado:</p>
+<pre class="codehilite"><code class="language-dockerfile"># Muda raramente
+COPY package*.json ./
+RUN npm ci
+
+# Muda frequentemente
+COPY . .
+RUN npm run build
+</code></pre>
+
+<p>Isto maximiza o cache de layers do Docker.</p>
+<h2 id="quando-usar">Quando Usar</h2>
+<p><strong>Usa multi-stage quando:</strong>
+- A aplicação precisa de ferramentas de build que não são necessárias em runtime
+- Queres minimizar a superfície de ataque (menos binários = menos vulnerabilidades)
+- Deploy speed importa (imagens menores = pulls mais rápidos)
+- Custos de storage são relevantes</p>
+<p><strong>Podes não precisar quando:</strong>
+- Estás em desenvolvimento local e rebuild speed é prioritário
+- A imagem base já é mínima
+- Precisas de debugging tools na imagem final (temporariamente)</p>
+<h2 id="conclusao">Conclusão</h2>
+<p>Multi-stage builds são uma das funcionalidades mais poderosas e subutilizadas do Docker. Com algumas linhas extra, reduzes drasticamente o tamanho das tuas imagens.</p>
+<p>Menos bytes. Deploys mais rápidos. Menos vectores de ataque.</p>
+<p>O peso importa. Torna as tuas imagens mais leves.</p>
+            </article>
+
+            <!-- Tags -->
+            <div class="post-tags">
+                <span class="tag">docker</span>
+<span class="tag">containers</span>
+<span class="tag">devops</span>
+<span class="tag">optimização</span>
+            </div>
+
+            <!-- Share Section -->
+            <div class="share-section">
+                <span class="share-label">Partilhar:</span>
+                <a href="#" id="shareX" target="_blank" class="share-btn">X</a>
+                <a href="#" id="shareLn" target="_blank" class="share-btn">LinkedIn</a>
+                <button id="mainCopyBtn" class="share-btn share-copy">Copiar Link</button>
+            </div>
+
+            <!-- Post Navigation -->
+            <nav class="post-nav">
+                                <a href="git-rebase-interativo.html" class="post-nav-link prev">
+                    <span class="nav-label">← Anterior</span>
+                    <span class="nav-title">Git Rebase Interativo: A Arte de Reescrever a História</span>
+                </a>                <a href="terminal-produtividade-real.html" class="post-nav-link next">
+                    <span class="nav-label">Próximo →</span>
+                    <span class="nav-title">Terminal: A Produtividade Real Está na Linha de Comandos</span>
+                </a>
+            </nav>
+        </main>
+
+        <div id="footer-placeholder"></div>
+        <script>loadFooter();</script>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox-overlay" id="lightbox">
+        <img src="" alt="Zoomed Image" class="lightbox-img" id="lightboxImg">
+    </div>
+
+    <!-- Ghost TOC -->
+    <div class="ghost-toc" id="ghostToc">
+        <h3>Índice</h3>
+        <ul id="tocList"></ul>
+    </div>
+
+    <style>
+        /* === BACK LINK === */
+        .back-link {
+            color: var(--c-text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--c-accent);
+        }
+
+        /* === POST HERO === */
+        .post-hero {
+            padding: 4rem 0 3rem;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 4rem;
+        }
+
+        .post-hero-meta {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .post-category {
+            color: var(--c-text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .post-category:hover {
+            color: var(--c-accent);
+        }
+
+        .meta-dot {
+            color: var(--c-text-sub);
+            opacity: 0.3;
+        }
+
+        .post-date,
+        .reading-time {
+            color: var(--c-text-sub);
+        }
+
+        .post-hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .post-hero-excerpt {
+            font-size: 1.25rem;
+            color: var(--c-text-sub);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        .post-author {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .author-label {
+            color: var(--c-text-sub);
+        }
+
+        .author-name {
+            color: var(--c-text-main);
+            font-weight: 600;
+        }
+
+        /* === ARTICLE BODY === */
+        .article-container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding-bottom: 4rem;
+        }
+
+        .article-body {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: var(--c-text-main);
+        }
+
+        .article-body p {
+            margin-bottom: 1.75rem;
+        }
+
+        .article-body p.lead {
+            font-size: 1.35rem;
+            color: var(--c-text-sub);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .article-body h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 3.5rem;
+            margin-bottom: 1.25rem;
+            color: var(--c-text-main);
+            position: relative;
+            padding-left: 1rem;
+            border-left: 3px solid var(--c-accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-anchor {
+            background: none;
+            border: none;
+            color: var(--c-text-sub);
+            opacity: 0;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            padding: 0.25rem;
+            transition: all 0.2s;
+            order: -1;
+            margin-left: -0.25rem;
+            margin-right: 0.25rem;
+        }
+
+        .article-body h2:hover .header-anchor {
+            opacity: 1;
+        }
+
+        .header-anchor:hover {
+            color: var(--c-accent);
+        }
+
+        /* === IMAGES === */
+        .post-image {
+            margin: 2.5rem 0;
+            text-align: center;
+        }
+
+        .post-image img {
+            max-width: 100%;
+            border-radius: 8px;
+            cursor: zoom-in;
+        }
+
+        .post-image figcaption {
+            font-size: 0.85rem;
+            color: var(--c-text-sub);
+            margin-top: 0.75rem;
+            font-style: italic;
+        }
+
+        /* === BLOCKQUOTE === */
+        .article-body blockquote {
+            border-left: 3px solid var(--c-accent);
+            padding: 1.5rem 2rem;
+            margin: 2.5rem 0;
+            background: var(--c-accent-subtle);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .article-body blockquote p {
+            font-size: 1.2rem;
+            font-style: italic;
+            color: var(--c-text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .article-body blockquote cite {
+            font-size: 0.9rem;
+            color: var(--c-text-sub);
+            font-style: normal;
+        }
+
+        /* === CALLOUT === */
+        .callout {
+            display: flex;
+            gap: 1rem;
+            padding: 1.25rem 1.5rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            background: var(--c-accent-subtle);
+            border: 1px solid var(--c-accent-soft);
+        }
+
+        .callout-icon {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--c-accent);
+            flex-shrink: 0;
+        }
+
+        .callout-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* === CODE === */
+        .article-body code {
+            font-family: var(--font-mono);
+            background: rgba(255, 255, 255, 0.08);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--c-accent);
+        }
+
+        .article-body pre {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .article-body pre code {
+            background: transparent;
+            padding: 0;
+            color: #f8f8f2;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Light mode code blocks - match terminal from /projetos */
+        [data-theme="light"] .article-body pre {
+            background: #f3f4f6 !important;
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .article-body pre[class*="language-"] {
+            background: #f3f4f6 !important;
+        }
+
+        [data-theme="light"] .article-body code {
+            background: rgba(0, 0, 0, 0.08);
+            color: var(--c-accent);
+        }
+
+        [data-theme="light"] .article-body pre code {
+            background: transparent;
+            color: var(--c-text-main);
+        }
+
+        /* Override Prism.js colors for light mode */
+        [data-theme="light"] .token.comment,
+        [data-theme="light"] .token.prolog,
+        [data-theme="light"] .token.doctype,
+        [data-theme="light"] .token.cdata {
+            color: var(--c-text-sub);
+        }
+
+        [data-theme="light"] .token.punctuation {
+            color: var(--c-text-main);
+        }
+
+        [data-theme="light"] .token.property,
+        [data-theme="light"] .token.tag,
+        [data-theme="light"] .token.boolean,
+        [data-theme="light"] .token.number,
+        [data-theme="light"] .token.constant,
+        [data-theme="light"] .token.symbol {
+            color: var(--c-accent);
+        }
+
+        [data-theme="light"] .token.selector,
+        [data-theme="light"] .token.attr-name,
+        [data-theme="light"] .token.string,
+        [data-theme="light"] .token.char,
+        [data-theme="light"] .token.builtin {
+            color: #2e7d32;
+        }
+
+        [data-theme="light"] .token.operator,
+        [data-theme="light"] .token.entity,
+        [data-theme="light"] .token.url,
+        [data-theme="light"] .token.variable {
+            color: var(--c-text-main);
+        }
+
+        [data-theme="light"] .token.atrule,
+        [data-theme="light"] .token.attr-value,
+        [data-theme="light"] .token.function,
+        [data-theme="light"] .token.class-name {
+            color: var(--c-accent);
+            font-weight: 600;
+        }
+
+        [data-theme="light"] .token.keyword {
+            color: #7b1fa2;
+        }
+
+        [data-theme="light"] .token.regex,
+        [data-theme="light"] .token.important {
+            color: #e65100;
+        }
+
+        /* === TAGS === */
+        .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 3rem 0 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] .post-tags {
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--c-text-sub);
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+        }
+
+        [data-theme="light"] .tag {
+            background: #d1d5db;
+            color: var(--c-text-main);
+        }
+
+        /* === SHARE === */
+        .share-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 2rem 0 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] .share-section {
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .share-label {
+            color: var(--c-text-sub);
+            font-size: 0.9rem;
+        }
+
+        .share-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--c-text-sub);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .share-btn:hover {
+            border-color: var(--c-accent);
+            color: var(--c-accent);
+        }
+
+        [data-theme="light"] .share-btn {
+            border: 1px solid rgba(0, 0, 0, 0.15);
+        }
+
+        [data-theme="light"] .share-btn:hover {
+            border-color: var(--c-accent);
+            color: var(--c-accent);
+        }
+
+        /* === POST NAVIGATION === */
+        .post-nav {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] .post-nav {
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .post-nav-link {
+            padding: 1.5rem;
+            background: var(--c-bg-card);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .post-nav-link:hover {
+            border-color: var(--c-accent-soft);
+            transform: translateY(-2px);
+        }
+
+        [data-theme="light"] .post-nav-link {
+            background: transparent;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .post-nav-link:hover {
+            border-color: var(--c-accent);
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .post-nav-link.next {
+            text-align: right;
+        }
+
+        .nav-label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--c-accent);
+            margin-bottom: 0.5rem;
+            font-family: var(--font-mono);
+        }
+
+        .nav-title {
+            display: block;
+            color: var(--c-text-main);
+            font-weight: 600;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .post-hero-title {
+                font-size: 2rem;
+            }
+
+            .post-hero-meta {
+                flex-wrap: wrap;
+            }
+
+            .post-nav {
+                grid-template-columns: 1fr;
+            }
+
+            .post-nav-link.next {
+                text-align: left;
+            }
+        }
+    </style>
+
+    <script>
+        // --- Copy Code Button ---
+        document.querySelectorAll('pre').forEach((pre) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'code-wrapper';
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(pre);
+
+            const button = document.createElement('button');
+            button.className = 'copy-btn';
+            button.innerText = 'Copy';
+            button.addEventListener('click', () => {
+                const code = pre.querySelector('code').innerText;
+                navigator.clipboard.writeText(code);
+                button.innerText = 'Copied!';
+                button.style.color = 'var(--c-accent)';
+                setTimeout(() => {
+                    button.innerText = 'Copy';
+                    button.style.color = '';
+                }, 2000);
+            });
+            wrapper.appendChild(button);
+        });
+
+        // --- Lightbox ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+
+        document.querySelectorAll('.article-body img, .post-image img').forEach(img => {
+            img.addEventListener('click', () => {
+                lightboxImg.src = img.src;
+                lightbox.classList.add('active');
+            });
+        });
+
+        lightbox.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+        });
+
+        // --- Ghost TOC ---
+        const tocList = document.getElementById('tocList');
+        const headers = document.querySelectorAll('.article-body h2');
+        const ghostToc = document.getElementById('ghostToc');
+
+        if (headers.length > 0) {
+            headers.forEach(header => {
+                if (!header.id) {
+                    header.id = header.innerText.toLowerCase()
+                        .replace(/[^\w\s-]/g, '')
+                        .replace(/\s+/g, '-');
+                }
+
+                const li = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = '#' + header.id;
+                link.innerText = header.innerText;
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById(header.id).scrollIntoView({ behavior: 'smooth' });
+                    history.pushState(null, null, '#' + header.id);
+                });
+                li.appendChild(link);
+                tocList.appendChild(li);
+
+                // Add anchor button before header
+                const anchorBtn = document.createElement('button');
+                anchorBtn.className = 'header-anchor';
+                anchorBtn.innerText = '#';
+                anchorBtn.title = 'Copiar link da secção';
+                anchorBtn.onclick = () => {
+                    const url = window.location.origin + window.location.pathname + '#' + header.id;
+                    navigator.clipboard.writeText(url);
+                    anchorBtn.innerText = '✓';
+                    anchorBtn.style.color = 'var(--c-accent)';
+                    setTimeout(() => {
+                        anchorBtn.innerText = '#';
+                        anchorBtn.style.color = '';
+                    }, 1500);
+                };
+                header.prepend(anchorBtn);
+            });
+
+            // Ghost Timer
+            let ghostTimer;
+            function wakeGhost() {
+                ghostToc.classList.add('active-ghost');
+                clearTimeout(ghostTimer);
+            }
+            function sleepGhost() {
+                ghostTimer = setTimeout(() => {
+                    ghostToc.classList.remove('active-ghost');
+                }, 5000);
+            }
+            ghostToc.addEventListener('mouseenter', wakeGhost);
+            ghostToc.addEventListener('mouseleave', sleepGhost);
+            sleepGhost();
+        } else {
+            ghostToc.style.display = 'none';
+        }
+
+        // --- Share Links ---
+        const currentUrl = encodeURIComponent(window.location.href);
+        const currentTitle = encodeURIComponent(document.title);
+        document.getElementById('shareX').href = `https://twitter.com/intent/tweet?text=${currentTitle}&url=${currentUrl}`;
+        document.getElementById('shareLn').href = `https://www.linkedin.com/sharing/share-offsite/?url=${currentUrl}`;
+
+        document.getElementById('mainCopyBtn').addEventListener('click', function () {
+            navigator.clipboard.writeText(window.location.href);
+            this.innerText = 'Copiado!';
+            this.style.borderColor = 'var(--c-accent)';
+            this.style.color = 'var(--c-accent)';
+            setTimeout(() => {
+                this.innerText = 'Copiar Link';
+                this.style.borderColor = '';
+                this.style.color = '';
+            }, 2000);
+        });
+    </script>
+</body>
+
+</html>

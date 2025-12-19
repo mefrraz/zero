@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pensamentos - zero()</title>
+    <meta name="description" content="Reflexões, filosofia e pensamentos soltos.">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>0</text></svg>">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="bg-layer">
+        <img src="../assets/1.png" alt="" class="bg-blob blob-1">
+        <img src="../assets/2.png" alt="" class="bg-blob blob-2">
+        <img src="../assets/3.png" alt="" class="bg-blob blob-3">
+    </div>
+
+    <div class="container">
+        <div id="header-placeholder"></div>
+        <script src="../components.js"></script>
+        <script>loadHeader();</script>
+
+        <!-- Category Hero -->
+        <section class="category-hero">
+            <span class="category-label">Categoria</span>
+            <h1>/pensamentos</h1>
+            <p>Reflexões sobre tecnologia, vida e tudo o que surge às 3 da manhã.</p>
+            <div class="category-stats">
+                <span class="stat"><strong>1</strong> post</span>
+                <span class="stat-dot">•</span>
+                <span class="stat">Última atualização: 15 Dez 2025</span>
+            </div>
+        </section>
+
+        <!-- Posts Grid -->
+        <section class="posts-grid">
+            <article class="post-card">
+                <div class="post-meta">
+                    <span>15 Dez 2025</span>
+                    <span>•</span>
+                    <span>Tecnologia</span>
+                </div>
+                <a href="../posts/linux-pela-quinta-vez.html" class="post-title-link">
+                    <h2 class="post-title">Por que eu voltei para o Linux (pela 5ª vez)</h2>
+                </a>
+                <p class="post-excerpt">Parece um ciclo sem fim, mas dessa vez é diferente. O Wayland finalmente
+                    funciona?</p>
+                <a href="../posts/linux-pela-quinta-vez.html" class="read-more">Ler mais →</a>
+            </article>
+
+            <article class="post-card">
+                <div class="post-meta">
+                    <span>10 Dez 2025</span>
+                    <span>•</span>
+                    <span>IA / Tech</span>
+                </div>
+                <a href="../posts/linux-pela-quinta-vez.html" class="post-title-link">
+                    <h2 class="post-title">Entendendo LLMs como se você tivesse 5 anos</h2>
+                </a>
+                <p class="post-excerpt">Não é mágica, é estatística. Mas estatística com esteróides e muita GPU.</p>
+                <a href="../posts/linux-pela-quinta-vez.html" class="read-more">Ler mais →</a>
+            </article>
+
+            <article class="post-card">
+                <div class="post-meta">
+                    <span>01 Dez 2025</span>
+                    <span>•</span>
+                    <span>Setup</span>
+                </div>
+                <a href="../posts/linux-pela-quinta-vez.html" class="post-title-link">
+                    <h2 class="post-title">Meu workflow no Neovim</h2>
+                </a>
+                <p class="post-excerpt">Leva apenas 3 semanas para configurar e economiza 2 segundos por dia. Vale a
+                    pena.</p>
+                <a href="../posts/linux-pela-quinta-vez.html" class="read-more">Ler mais →</a>
+            </article>
+        </section>
+
+        <div id="footer-placeholder"></div>
+        <script>loadFooter();</script>
+    </div>
+
+    <style>
+        .category-hero {
+            padding: 4rem 0 3rem;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .category-label {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--c-accent);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+        }
+
+        .category-hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+            /* Smaller animation for shorter title */
+            background: linear-gradient(135deg, var(--c-text-main) 0%, var(--c-text-sub) 50%, var(--c-accent) 100%);
+            background-size: 150% 150%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 8s ease infinite;
+        }
+
+        .category-hero p {
+            font-size: 1.15rem;
+            color: var(--c-text-sub);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .category-stats {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: var(--c-text-sub);
+        }
+
+        .category-stats strong {
+            color: var(--c-accent);
+        }
+
+        .stat-dot {
+            opacity: 0.3;
+        }
+
+        @media (max-width: 768px) {
+            .category-hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .category-stats {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .stat-dot {
+                display: none;
+            }
+        }
+    </style>
+</body>
+
+</html>

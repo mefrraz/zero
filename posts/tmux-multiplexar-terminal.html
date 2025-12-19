@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tmux: O Terminal Dentro do Terminal - zero()</title>
+    <meta name="description" content="Porque é que um terminal não chega. Guia completo do tmux: desde os fundamentos até configurações avançadas.">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>0</text></svg>">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+    <!-- Prism.js for Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+</head>
+
+<body>
+    <div class="bg-layer">
+        <img src="../assets/1.png" alt="" class="bg-blob blob-1">
+        <img src="../assets/2.png" alt="" class="bg-blob blob-2">
+        <img src="../assets/3.png" alt="" class="bg-blob blob-3">
+    </div>
+
+    <div class="container">
+        <div id="header-placeholder"></div>
+        <script src="../components.js"></script>
+        <script>loadHeader();</script>
+
+
+        <!-- Article Header -->
+        <header class="post-hero">
+            <div class="post-hero-meta">
+                <a href="javascript:history.back()" class="back-link">← Voltar</a>
+                <span class="meta-dot">•</span>
+                <a href="../categories/category-tools.html" class="post-category">Tools</a>
+                <span class="meta-dot">•</span>
+                <span class="post-date">19 Dez 2025</span>
+                <span class="meta-dot">•</span>
+                <span class="reading-time">12 min de leitura</span>
+            </div>
+            <h1 class="post-hero-title">Tmux: O Terminal Dentro do Terminal</h1>
+            <p class="post-hero-excerpt">Porque é que um terminal não chega. Guia completo do tmux: desde os fundamentos até configurações avançadas.</p>
+        </header>
+
+        <!-- Article Content -->
+        <main class="article-container">
+            <article class="article-body">
+                <p>Tens o terminal aberto. Um processo a correr. Precisas de fazer outra coisa. Abres outro terminal. E outro. E outro. Tabs a multiplicar-se como coelhos. A cada reinício, perdes tudo. Liga-te a um servidor por SSH, a conexão cai, e o processo que estava a correr morre com ela.</p>
+<p>Há uma forma melhor. E chama-se <strong>tmux</strong>.</p>
+<h2 id="o-problema-real">O Problema Real</h2>
+<p>O terminal tradicional tem uma limitação fundamental: uma janela, um contexto. Fecha-a e o processo morre. Desliga-te de um servidor remoto e perdes a sessão. É efémero por natureza.</p>
+<p>Isto não era um problema quando usavas o terminal para comandos rápidos. Mas quando o terminal se torna o teu ambiente de trabalho principal, quando tens um editor, um servidor de desenvolvimento, logs, e uma shell de comandos todos a correr simultaneamente, a limitação torna-se insuportável.</p>
+<p>O <strong>tmux</strong> (terminal multiplexer) resolve isto de forma elegante. Cria uma camada de abstração entre ti e o terminal. As tuas sessões vivem independentemente da janela que as mostra. São processos do sistema, não da aplicação de terminal.</p>
+<p>Pensa nisto assim: o tmux é um gestor de janelas para o terminal. Tal como o i3 ou o Sway gerem as tuas janelas gráficas, o tmux gere as tuas sessões de terminal.</p>
+<h2 id="conceitos-fundamentais">Conceitos Fundamentais</h2>
+<p>Antes de meter as mãos na massa, precisas de entender três conceitos que formam a hierarquia do tmux:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Conceito</th>
+<th style="text-align: left;">Descrição</th>
+<th style="text-align: left;">Analogia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Session</td>
+<td style="text-align: left;">Um workspace completo. Pode ter múltiplas janelas. Persiste mesmo que te desligues.</td>
+<td style="text-align: left;">Um desktop virtual</td>
+</tr>
+<tr>
+<td style="text-align: left;">Window</td>
+<td style="text-align: left;">Uma tab dentro da sessão. Ocupa o ecrã inteiro.</td>
+<td style="text-align: left;">Uma janela maximizada</td>
+</tr>
+<tr>
+<td style="text-align: left;">Pane</td>
+<td style="text-align: left;">Uma divisão dentro de uma janela. Dois ou mais terminais lado a lado.</td>
+<td style="text-align: left;">Split screen</td>
+</tr>
+</tbody>
+</table>
+<p>A hierarquia é: <strong>Session &gt; Window &gt; Pane</strong></p>
+<p>Uma sessão pode ter muitas janelas. Cada janela pode ter muitos panes. Todas as sessões persistem enquanto o servidor tmux estiver a correr, independentemente de teres alguma janela de terminal aberta ou não.</p>
+<p>Este último ponto é crucial. Quando "sais" do tmux, não estás a fechar nada. Estás a desconectar-te de uma sessão que continua a existir. O servidor de desenvolvimento continua a correr. O ficheiro continua aberto no vim. Tudo à tua espera.</p>
+<h2 id="instalacao">Instalação</h2>
+<pre class="codehilite"><code class="language-bash"># Arch Linux
+sudo pacman -S tmux
+
+# Debian/Ubuntu
+sudo apt install tmux
+
+# Fedora
+sudo dnf install tmux
+
+# macOS (com Homebrew)
+brew install tmux
+</code></pre>
+
+<p>Verifica a instalação:</p>
+<pre class="codehilite"><code class="language-bash">tmux -V
+# tmux 3.4
+</code></pre>
+
+<h2 id="os-primeiros-passos">Os Primeiros Passos</h2>
+<h3 id="criar-uma-sessao">Criar uma Sessão</h3>
+<p>O comando mais básico:</p>
+<pre class="codehilite"><code class="language-bash">tmux
+</code></pre>
+
+<p>Isto cria uma sessão anónima. Funciona, mas não é ideal. Prefere sempre criar sessões com nome:</p>
+<pre class="codehilite"><code class="language-bash">tmux new-session -s trabalho
+</code></pre>
+
+<p>Ou a forma abreviada:</p>
+<pre class="codehilite"><code class="language-bash">tmux new -s trabalho
+</code></pre>
+
+<p>O <code>-s</code> define o nome da sessão. Nomes são importantes. Quando tens várias sessões (e vais ter), precisas de as distinguir.</p>
+<h3 id="o-prefixo">O Prefixo</h3>
+<p>Agora estás dentro do tmux. Parece um terminal normal. Quase é. A diferença está nos atalhos.</p>
+<div class="callout">
+    <div class="callout-icon">&gt;</div>
+    <div class="callout-content">
+        <strong>Conceito Fundamental:</strong> Todos os comandos dentro do tmux começam com um <strong>prefixo</strong>. Por defeito é <code>Ctrl+b</code>. Carregas no prefixo, <em>largas</em>, e depois carregas na tecla do comando. Não é uma combinação simultânea.
+    </div>
+</div>
+
+<p>Por exemplo, para criar uma nova janela: <code>Ctrl+b</code> (larga) <code>c</code>.</p>
+<p>Este prefixo pode parecer estranho. E é. Mais à frente vamos mudá-lo para algo mais ergonómico. Mas por agora, vamos usá-lo para aprendermos os comandos.</p>
+<h3 id="comandos-essenciais-de-janelas">Comandos Essenciais de Janelas</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Atalho</th>
+<th style="text-align: left;">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b c</code></td>
+<td style="text-align: left;">Criar nova janela</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b ,</code></td>
+<td style="text-align: left;">Renomear janela atual</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b n</code></td>
+<td style="text-align: left;">Próxima janela</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b p</code></td>
+<td style="text-align: left;">Janela anterior</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b 0-9</code></td>
+<td style="text-align: left;">Ir para janela pelo número</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b w</code></td>
+<td style="text-align: left;">Lista interativa de janelas</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b &amp;</code></td>
+<td style="text-align: left;">Fechar janela atual (com confirmação)</td>
+</tr>
+</tbody>
+</table>
+<p>A barra de estado no fundo mostra as janelas activas. Um asterisco marca a janela actual.</p>
+<h3 id="comandos-essenciais-de-panes">Comandos Essenciais de Panes</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Atalho</th>
+<th style="text-align: left;">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b %</code></td>
+<td style="text-align: left;">Dividir verticalmente (lado a lado)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b "</code></td>
+<td style="text-align: left;">Dividir horizontalmente (um em cima do outro)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b setas</code></td>
+<td style="text-align: left;">Navegar entre panes</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b o</code></td>
+<td style="text-align: left;">Próximo pane (rotação)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b z</code></td>
+<td style="text-align: left;">Zoom no pane actual (toggle)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b x</code></td>
+<td style="text-align: left;">Fechar pane atual (com confirmação)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b {</code></td>
+<td style="text-align: left;">Mover pane para a esquerda</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b }</code></td>
+<td style="text-align: left;">Mover pane para a direita</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>Ctrl+b Ctrl+setas</code></td>
+<td style="text-align: left;">Redimensionar pane</td>
+</tr>
+</tbody>
+</table>
+<p>O zoom (<code>Ctrl+b z</code>) é particularmente útil. Amplia o pane actual para ocupar toda a janela. Carrega outra vez para voltar ao layout anterior.</p>
+<h3 id="detach-e-attach">Detach e Attach</h3>
+<p>O poder real do tmux está na capacidade de desanexar e reanexar sessões.</p>
+<pre class="codehilite"><code class="language-bash"># Dentro do tmux: desanexar
+Ctrl+b d
+
+# Fora do tmux: ver sessões activas
+tmux ls
+
+# Reanexar a uma sessão específica
+tmux attach -t trabalho
+
+# Ou a forma abreviada
+tmux a -t trabalho
+</code></pre>
+
+<p>Quando fazes <code>detach</code>, sais do tmux mas tudo continua a correr. Podes fechar o terminal. Podes desligar o computador (se for um servidor remoto). A sessão persiste.</p>
+<p>Isto é transformador para trabalho remoto. Ligas-te por SSH, fazes attach à sessão, trabalhas. A conexão cai? Liga-te outra vez e faz attach. Está tudo exactamente como deixaste.</p>
+<h2 id="o-workflow-real">O Workflow Real</h2>
+<p>Vamos ver como isto se traduz num dia de trabalho real.</p>
+<h3 id="sessao-de-desenvolvimento">Sessão de Desenvolvimento</h3>
+<p>Estás a trabalhar num projecto. Crias uma sessão dedicada:</p>
+<pre class="codehilite"><code class="language-bash">tmux new -s meu-projeto
+</code></pre>
+
+<p><strong>Janela 1 - Editor:</strong> Abres o neovim com o projecto.</p>
+<pre class="codehilite"><code class="language-bash">nvim .
+</code></pre>
+
+<p><strong>Janela 2 - Servidor:</strong> <code>Ctrl+b c</code> para nova janela. Arranques o servidor de desenvolvimento.</p>
+<pre class="codehilite"><code class="language-bash">npm run dev
+</code></pre>
+
+<p><strong>Janela 3 - Testes:</strong> <code>Ctrl+b c</code>. Corres os testes em modo watch.</p>
+<pre class="codehilite"><code class="language-bash">npm run test:watch
+</code></pre>
+
+<p><strong>Janela 4 - Shell:</strong> <code>Ctrl+b c</code>. Uma shell livre para git, comandos diversos.</p>
+<p>Agora navegas entre elas com <code>Ctrl+b n</code> ou <code>Ctrl+b p</code>. Ou directamente com <code>Ctrl+b 1</code>, <code>Ctrl+b 2</code>, etc.</p>
+<h3 id="sessoes-multiplas">Sessões Múltiplas</h3>
+<p>Estás a meio deste projecto quando surge algo urgente noutro. Não precisas de fechar nada.</p>
+<pre class="codehilite"><code class="language-bash"># Detach (ou usa Ctrl+b d)
+Ctrl+b d
+
+# Cria nova sessão para o urgente
+tmux new -s emergencia
+
+# Trabalhas no urgente...
+
+# Quando acabares, volta ao projecto original
+Ctrl+b d
+tmux a -t meu-projeto
+</code></pre>
+
+<p>Tudo está como deixaste. O servidor ainda a correr. Os testes ainda em watch. O ficheiro aberto no editor exactamente na mesma linha.</p>
+<h3 id="panes-para-contexto">Panes para Contexto</h3>
+<p>Dentro de uma janela, às vezes precisas de ver várias coisas simultaneamente. É aqui que os panes brilham.</p>
+<p>Exemplo: debugging. Divide a janela:
+- Pane esquerdo: código (vim)
+- Pane direito superior: logs do servidor
+- Pane direito inferior: comandos curl para testar</p>
+<pre class="codehilite"><code class="language-bash"># Começas com o editor
+nvim app.py
+
+# Divide verticalmente
+Ctrl+b %
+
+# No novo pane, segue os logs
+tail -f /var/log/app.log
+
+# Divide o pane direito horizontalmente
+Ctrl+b &quot;
+
+# Agora tens 3 panes
+</code></pre>
+
+<p>O <code>Ctrl+b z</code> permite fazer zoom num pane quando precisas de mais espaço, e voltar ao layout com outro <code>Ctrl+b z</code>.</p>
+<h2 id="configuracao">Configuração</h2>
+<p>O tmux é altamente configurável. O ficheiro de configuração vive em <code>~/.tmux.conf</code>.</p>
+<h3 id="configuracao-base-recomendada">Configuração Base Recomendada</h3>
+<pre class="codehilite"><code class="language-bash"># ~/.tmux.conf
+
+# ========================================
+# Prefixo
+# ========================================
+# Ctrl+b é difícil de alcançar. Ctrl+a é mais natural.
+unbind C-b
+set -g prefix C-a
+bind C-a send-prefix
+
+# ========================================
+# Comportamento Geral
+# ========================================
+# Começar a contar janelas e panes de 1, não de 0
+set -g base-index 1
+setw -g pane-base-index 1
+
+# Renumerar janelas quando uma é fechada
+set -g renumber-windows on
+
+# Histórico maior
+set -g history-limit 50000
+
+# Tempo de display de mensagens (ms)
+set -g display-time 4000
+
+# Refresh da barra de estado mais frequente
+set -g status-interval 5
+
+# Foco de eventos (útil para vim)
+set -g focus-events on
+
+# Modo vi para copy mode
+setw -g mode-keys vi
+
+# ========================================
+# Divisões (Splits) Mais Intuitivas
+# ========================================
+# | para vertical, - para horizontal
+bind | split-window -h -c &quot;#{pane_current_path}&quot;
+bind - split-window -v -c &quot;#{pane_current_path}&quot;
+unbind '&quot;'
+unbind %
+
+# O -c &quot;#{pane_current_path}&quot; abre o novo pane no mesmo directório
+
+# ========================================
+# Navegação Entre Panes
+# ========================================
+# Alt+setas sem prefixo (mais rápido)
+bind -n M-Left select-pane -L
+bind -n M-Right select-pane -R
+bind -n M-Up select-pane -U
+bind -n M-Down select-pane -D
+
+# Ou estilo vim (com prefixo)
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+# ========================================
+# Redimensionar Panes
+# ========================================
+bind -r H resize-pane -L 5
+bind -r J resize-pane -D 5
+bind -r K resize-pane -U 5
+bind -r L resize-pane -R 5
+
+# ========================================
+# Recarregar Configuração
+# ========================================
+bind r source-file ~/.tmux.conf \; display &quot;Config reloaded!&quot;
+
+# ========================================
+# Visual
+# ========================================
+# Cores verdadeiras (truecolor)
+set -g default-terminal &quot;tmux-256color&quot;
+set -ag terminal-overrides &quot;,xterm-256color:RGB&quot;
+
+# Barra de estado minimalista
+set -g status-style 'bg=#1a1b26 fg=#a9b1d6'
+set -g status-left '#[fg=#08F42A,bold] #S '
+set -g status-right '#[fg=#a9b1d6] %H:%M '
+set -g status-left-length 30
+
+# Janela actual destacada
+set -g window-status-current-style 'fg=#08F42A,bold'
+set -g window-status-style 'fg=#565f89'
+
+# Borda dos panes
+set -g pane-border-style 'fg=#565f89'
+set -g pane-active-border-style 'fg=#08F42A'
+</code></pre>
+
+<p>Depois de guardar, recarrega:</p>
+<pre class="codehilite"><code class="language-bash">tmux source-file ~/.tmux.conf
+</code></pre>
+
+<p>Ou, se já adicionaste o bind: <code>Ctrl+a r</code> (assumindo que mudaste o prefixo para <code>Ctrl+a</code>).</p>
+<h3 id="copy-mode">Copy Mode</h3>
+<p>O tmux tem um modo de cópia que permite navegar pelo histórico e copiar texto. Com a configuração acima (<code>mode-keys vi</code>), usas comandos vim.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Atalho</th>
+<th style="text-align: left;">Ação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>Ctrl+a [</code></td>
+<td style="text-align: left;">Entrar em copy mode</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>q</code></td>
+<td style="text-align: left;">Sair de copy mode</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>v</code></td>
+<td style="text-align: left;">Iniciar selecção</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>y</code></td>
+<td style="text-align: left;">Copiar selecção</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>/</code></td>
+<td style="text-align: left;">Pesquisar</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>n</code> / <code>N</code></td>
+<td style="text-align: left;">Próxima/anterior ocorrência</td>
+</tr>
+</tbody>
+</table>
+<p>Para colar: <code>Ctrl+a ]</code></p>
+<p>Para integrar com o clipboard do sistema, adiciona à config:</p>
+<pre class="codehilite"><code class="language-bash"># Linux (X11)
+bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel &quot;xclip -selection clipboard&quot;
+
+# Linux (Wayland)
+bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel &quot;wl-copy&quot;
+
+# macOS
+bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel &quot;pbcopy&quot;
+</code></pre>
+
+<h2 id="automacao-com-scripts">Automação com Scripts</h2>
+<p>Para projectos recorrentes, criar a estrutura manualmente é repetitivo. Scripts de sessão resolvem isto.</p>
+<h3 id="script-basico">Script Básico</h3>
+<pre class="codehilite"><code class="language-bash">#!/bin/bash
+# ~/scripts/tmux-projeto.sh
+
+SESSION=&quot;projeto&quot;
+PROJECT_DIR=&quot;$HOME/dev/meu-projeto&quot;
+
+# Mata sessão existente se houver
+tmux kill-session -t $SESSION 2&gt;/dev/null
+
+# Cria nova sessão em background
+tmux new-session -d -s $SESSION -n editor -c $PROJECT_DIR
+
+# Janela 1: Editor
+tmux send-keys -t $SESSION:editor &quot;nvim .&quot; Enter
+
+# Janela 2: Servidor
+tmux new-window -t $SESSION -n server -c $PROJECT_DIR
+tmux send-keys -t $SESSION:server &quot;npm run dev&quot; Enter
+
+# Janela 3: Testes
+tmux new-window -t $SESSION -n tests -c $PROJECT_DIR
+tmux send-keys -t $SESSION:tests &quot;npm run test:watch&quot; Enter
+
+# Janela 4: Git/Shell
+tmux new-window -t $SESSION -n git -c $PROJECT_DIR
+
+# Volta à primeira janela
+tmux select-window -t $SESSION:editor
+
+# Anexa à sessão
+tmux attach -t $SESSION
+</code></pre>
+
+<p>Torna executável e corre:</p>
+<pre class="codehilite"><code class="language-bash">chmod +x ~/scripts/tmux-projeto.sh
+~/scripts/tmux-projeto.sh
+</code></pre>
+
+<p>Um comando e tens o ambiente completo.</p>
+<h3 id="sessoes-com-panes">Sessões com Panes</h3>
+<pre class="codehilite"><code class="language-bash">#!/bin/bash
+# Sessão de monitorização
+
+SESSION=&quot;monitor&quot;
+
+tmux new-session -d -s $SESSION -n main
+
+# Divide em 4 panes
+tmux split-window -h -t $SESSION:main
+tmux split-window -v -t $SESSION:main.0
+tmux split-window -v -t $SESSION:main.1
+
+# Comandos em cada pane
+tmux send-keys -t $SESSION:main.0 &quot;htop&quot; Enter
+tmux send-keys -t $SESSION:main.1 &quot;watch -n 1 'df -h'&quot; Enter
+tmux send-keys -t $SESSION:main.2 &quot;journalctl -f&quot; Enter
+tmux send-keys -t $SESSION:main.3 &quot;tail -f /var/log/syslog&quot; Enter
+
+tmux attach -t $SESSION
+</code></pre>
+
+<h3 id="tmuxinator-opcional">Tmuxinator (Opcional)</h3>
+<p>Se quiseres gestão mais sofisticada, o tmuxinator permite definir sessões em YAML:</p>
+<pre class="codehilite"><code class="language-bash"># Instala
+gem install tmuxinator
+
+# Cria projecto
+tmuxinator new projeto
+</code></pre>
+
+<p>Isto cria <code>~/.config/tmuxinator/projeto.yml</code>:</p>
+<pre class="codehilite"><code class="language-yaml">name: projeto
+root: ~/dev/meu-projeto
+
+windows:
+  - editor:
+      layout: main-vertical
+      panes:
+        - nvim .
+        - # pane vazio para comandos
+  - server: npm run dev
+  - tests: npm run test:watch
+  - git:
+</code></pre>
+
+<p>Arrancar: <code>tmuxinator start projeto</code></p>
+<h2 id="plugins">Plugins</h2>
+<p>O tmux tem um ecossistema de plugins. O gestor mais popular é o <strong>TPM</strong> (Tmux Plugin Manager).</p>
+<h3 id="instalar-tpm">Instalar TPM</h3>
+<pre class="codehilite"><code class="language-bash">git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+</code></pre>
+
+<p>Adiciona ao fim do <code>~/.tmux.conf</code>:</p>
+<pre class="codehilite"><code class="language-bash"># Lista de plugins
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+
+# Inicializar TPM (manter no fim)
+run '~/.tmux/plugins/tpm/tpm'
+</code></pre>
+
+<p>Recarrega e instala: <code>Ctrl+a I</code> (I maiúsculo).</p>
+<h3 id="plugins-recomendados">Plugins Recomendados</h3>
+<p><strong>tmux-resurrect</strong>: Guarda e restaura sessões.</p>
+<pre class="codehilite"><code class="language-bash">set -g @plugin 'tmux-plugins/tmux-resurrect'
+
+# Ctrl+a Ctrl+s - guardar
+# Ctrl+a Ctrl+r - restaurar
+</code></pre>
+
+<p><strong>tmux-continuum</strong>: Guarda automaticamente a cada 15 minutos.</p>
+<pre class="codehilite"><code class="language-bash">set -g @plugin 'tmux-plugins/tmux-continuum'
+set -g @continuum-restore 'on'
+</code></pre>
+
+<p><strong>tmux-yank</strong>: Copy/paste melhorado.</p>
+<pre class="codehilite"><code class="language-bash">set -g @plugin 'tmux-plugins/tmux-yank'
+</code></pre>
+
+<h2 id="dicas-avancadas">Dicas Avançadas</h2>
+<h3 id="sessoes-partilhadas">Sessões Partilhadas</h3>
+<p>Múltiplos utilizadores podem anexar à mesma sessão:</p>
+<pre class="codehilite"><code class="language-bash"># Utilizador 1 cria
+tmux new -s partilhada
+
+# Utilizador 2 anexa (mesmo sistema)
+tmux attach -t partilhada
+</code></pre>
+
+<p>Ambos vêem e controlam a mesma sessão. Útil para pair programming.</p>
+<h3 id="nested-tmux-tmux-dentro-de-tmux">Nested Tmux (Tmux dentro de Tmux)</h3>
+<p>Quando fazes SSH para um servidor que também usa tmux, tens tmux dentro de tmux. Para enviar comandos ao tmux "interior":</p>
+<pre class="codehilite"><code class="language-bash">Ctrl+a a &lt;comando&gt;  # O segundo 'a' envia Ctrl+a ao tmux interior
+</code></pre>
+
+<p>Ou muda o prefixo do tmux remoto para algo diferente.</p>
+<h3 id="capturar-output">Capturar Output</h3>
+<p>Guardar o histórico de um pane para ficheiro:</p>
+<pre class="codehilite"><code class="language-bash"># Dentro do tmux
+Ctrl+a : capture-pane -S -3000
+Ctrl+a : save-buffer ~/output.txt
+</code></pre>
+
+<p>Ou num comando:</p>
+<pre class="codehilite"><code class="language-bash">tmux capture-pane -t sessao:janela.pane -p -S -3000 &gt; output.txt
+</code></pre>
+
+<h2 id="a-curva-de-aprendizagem">A Curva de Aprendizagem</h2>
+<p>Vou ser honesto: a primeira semana é difícil. Vais esquecer-te dos atalhos. Vais confundir-te entre janelas e panes. Vais ter que consultar este guia vezes sem conta.</p>
+<p>Mas depois de uma semana, os atalhos tornam-se memória muscular. Depois de um mês, não consegues imaginar trabalhar sem isto. O terminal deixa de ser uma ferramenta descartável e passa a ser um ambiente de trabalho persistente e organizado.</p>
+<p>A chave é forçares-te a usar, mesmo quando seria mais fácil abrir outra tab do terminal. É no desconforto inicial que o hábito se forma.</p>
+<h2 id="conclusao">Conclusão</h2>
+<p>O tmux não é sobre ter mais terminais. É sobre organizar melhor o que já tens.</p>
+<p>É sobre sessões que persistem. Sobre contextos que se mantêm. Sobre nunca mais perderes trabalho por uma conexão SSH que caiu ou um terminal que fechaste por engano.</p>
+<p>O tmux transforma o terminal de uma ferramenta efémera numa extensão do teu sistema. Sempre disponível. Sempre no mesmo estado. Sempre à tua espera.</p>
+<p>É uma daquelas ferramentas que, depois de a dominares, te faz perguntar como é que vivias sem ela.</p>
+            </article>
+
+            <!-- Tags -->
+            <div class="post-tags">
+                <span class="tag">terminal</span>
+<span class="tag">produtividade</span>
+<span class="tag">linux</span>
+            </div>
+
+            <!-- Share Section -->
+            <div class="share-section">
+                <span class="share-label">Partilhar:</span>
+                <a href="#" id="shareX" target="_blank" class="share-btn">X</a>
+                <a href="#" id="shareLn" target="_blank" class="share-btn">LinkedIn</a>
+                <button id="mainCopyBtn" class="share-btn share-copy">Copiar Link</button>
+            </div>
+
+            <!-- Post Navigation -->
+            <nav class="post-nav">
+                                <a href="culto-produtividade-digital.html" class="post-nav-link prev">
+                    <span class="nav-label">← Anterior</span>
+                    <span class="nav-title">O Culto da Produtividade: Uma Crítica</span>
+                </a>                <a href="dotfiles-versionar-configuracoes.html" class="post-nav-link next">
+                    <span class="nav-label">Próximo →</span>
+                    <span class="nav-title">Dotfiles: A Arte de Versionar o Teu Sistema</span>
+                </a>
+            </nav>
+        </main>
+
+        <div id="footer-placeholder"></div>
+        <script>loadFooter();</script>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox-overlay" id="lightbox">
+        <img src="" alt="Zoomed Image" class="lightbox-img" id="lightboxImg">
+    </div>
+
+    <!-- Ghost TOC -->
+    <div class="ghost-toc" id="ghostToc">
+        <h3>Índice</h3>
+        <ul id="tocList"></ul>
+    </div>
+
+    <style>
+        /* === BACK LINK === */
+        .back-link {
+            color: var(--c-text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--c-accent);
+        }
+
+        /* === POST HERO === */
+        .post-hero {
+            padding: 4rem 0 3rem;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 4rem;
+        }
+
+        .post-hero-meta {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .post-category {
+            color: var(--c-text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .post-category:hover {
+            color: var(--c-accent);
+        }
+
+        .meta-dot {
+            color: var(--c-text-sub);
+            opacity: 0.3;
+        }
+
+        .post-date,
+        .reading-time {
+            color: var(--c-text-sub);
+        }
+
+        .post-hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .post-hero-excerpt {
+            font-size: 1.25rem;
+            color: var(--c-text-sub);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        .post-author {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .author-label {
+            color: var(--c-text-sub);
+        }
+
+        .author-name {
+            color: var(--c-text-main);
+            font-weight: 600;
+        }
+
+        /* === ARTICLE BODY === */
+        .article-container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding-bottom: 4rem;
+        }
+
+        .article-body {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: var(--c-text-main);
+        }
+
+        .article-body p {
+            margin-bottom: 1.75rem;
+        }
+
+        .article-body p.lead {
+            font-size: 1.35rem;
+            color: var(--c-text-sub);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .article-body h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 3.5rem;
+            margin-bottom: 1.25rem;
+            color: var(--c-text-main);
+            position: relative;
+            padding-left: 1rem;
+            border-left: 3px solid var(--c-accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-anchor {
+            background: none;
+            border: none;
+            color: var(--c-text-sub);
+            opacity: 0;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            padding: 0.25rem;
+            transition: all 0.2s;
+            order: -1;
+            margin-left: -0.25rem;
+            margin-right: 0.25rem;
+        }
+
+        .article-body h2:hover .header-anchor {
+            opacity: 1;
+        }
+
+        .header-anchor:hover {
+            color: var(--c-accent);
+        }
+
+        /* === IMAGES === */
+        .post-image {
+            margin: 2.5rem 0;
+            text-align: center;
+        }
+
+        .post-image img {
+            max-width: 100%;
+            border-radius: 8px;
+            cursor: zoom-in;
+        }
+
+        .post-image figcaption {
+            font-size: 0.85rem;
+            color: var(--c-text-sub);
+            margin-top: 0.75rem;
+            font-style: italic;
+        }
+
+        /* === BLOCKQUOTE === */
+        .article-body blockquote {
+            border-left: 3px solid var(--c-accent);
+            padding: 1.5rem 2rem;
+            margin: 2.5rem 0;
+            background: var(--c-accent-subtle);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .article-body blockquote p {
+            font-size: 1.2rem;
+            font-style: italic;
+            color: var(--c-text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .article-body blockquote cite {
+            font-size: 0.9rem;
+            color: var(--c-text-sub);
+            font-style: normal;
+        }
+
+        /* === CALLOUT === */
+        .callout {
+            display: flex;
+            gap: 1rem;
+            padding: 1.25rem 1.5rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            background: var(--c-accent-subtle);
+            border: 1px solid var(--c-accent-soft);
+        }
+
+        .callout-icon {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--c-accent);
+            flex-shrink: 0;
+        }
+
+        .callout-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* === CODE === */
+        .article-body code {
+            font-family: var(--font-mono);
+            background: rgba(255, 255, 255, 0.08);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--c-accent);
+        }
+
+        .article-body pre {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .article-body pre code {
+            background: transparent;
+            padding: 0;
+            color: #f8f8f2;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Light mode code blocks - match terminal from /projetos */
+        [data-theme="light"] .article-body pre {
+            background: #f3f4f6 !important;
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .article-body pre[class*="language-"] {
+            background: #f3f4f6 !important;
+        }
+
+        [data-theme="light"] .article-body code {
+            background: rgba(0, 0, 0, 0.08);
+            color: var(--c-accent);
+        }
+
+        [data-theme="light"] .article-body pre code {
+            background: transparent;
+            color: var(--c-text-main);
+        }
+
+        /* Override Prism.js colors for light mode */
+        [data-theme="light"] .token.comment,
+        [data-theme="light"] .token.prolog,
+        [data-theme="light"] .token.doctype,
+        [data-theme="light"] .token.cdata {
+            color: var(--c-text-sub);
+        }
+
+        [data-theme="light"] .token.punctuation {
+            color: var(--c-text-main);
+        }
+
+        [data-theme="light"] .token.property,
+        [data-theme="light"] .token.tag,
+        [data-theme="light"] .token.boolean,
+        [data-theme="light"] .token.number,
+        [data-theme="light"] .token.constant,
+        [data-theme="light"] .token.symbol {
+            color: var(--c-accent);
+        }
+
+        [data-theme="light"] .token.selector,
+        [data-theme="light"] .token.attr-name,
+        [data-theme="light"] .token.string,
+        [data-theme="light"] .token.char,
+        [data-theme="light"] .token.builtin {
+            color: #2e7d32;
+        }
+
+        [data-theme="light"] .token.operator,
+        [data-theme="light"] .token.entity,
+        [data-theme="light"] .token.url,
+        [data-theme="light"] .token.variable {
+            color: var(--c-text-main);
+        }
+
+        [data-theme="light"] .token.atrule,
+        [data-theme="light"] .token.attr-value,
+        [data-theme="light"] .token.function,
+        [data-theme="light"] .token.class-name {
+            color: var(--c-accent);
+            font-weight: 600;
+        }
+
+        [data-theme="light"] .token.keyword {
+            color: #7b1fa2;
+        }
+
+        [data-theme="light"] .token.regex,
+        [data-theme="light"] .token.important {
+            color: #e65100;
+        }
+
+        /* === TAGS === */
+        .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 3rem 0 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] .post-tags {
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--c-text-sub);
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+        }
+
+        [data-theme="light"] .tag {
+            background: #d1d5db;
+            color: var(--c-text-main);
+        }
+
+        /* === SHARE === */
+        .share-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 2rem 0 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] .share-section {
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .share-label {
+            color: var(--c-text-sub);
+            font-size: 0.9rem;
+        }
+
+        .share-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--c-text-sub);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .share-btn:hover {
+            border-color: var(--c-accent);
+            color: var(--c-accent);
+        }
+
+        [data-theme="light"] .share-btn {
+            border: 1px solid rgba(0, 0, 0, 0.15);
+        }
+
+        [data-theme="light"] .share-btn:hover {
+            border-color: var(--c-accent);
+            color: var(--c-accent);
+        }
+
+        /* === POST NAVIGATION === */
+        .post-nav {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] .post-nav {
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .post-nav-link {
+            padding: 1.5rem;
+            background: var(--c-bg-card);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .post-nav-link:hover {
+            border-color: var(--c-accent-soft);
+            transform: translateY(-2px);
+        }
+
+        [data-theme="light"] .post-nav-link {
+            background: transparent;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .post-nav-link:hover {
+            border-color: var(--c-accent);
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .post-nav-link.next {
+            text-align: right;
+        }
+
+        .nav-label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--c-accent);
+            margin-bottom: 0.5rem;
+            font-family: var(--font-mono);
+        }
+
+        .nav-title {
+            display: block;
+            color: var(--c-text-main);
+            font-weight: 600;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .post-hero-title {
+                font-size: 2rem;
+            }
+
+            .post-hero-meta {
+                flex-wrap: wrap;
+            }
+
+            .post-nav {
+                grid-template-columns: 1fr;
+            }
+
+            .post-nav-link.next {
+                text-align: left;
+            }
+        }
+    </style>
+
+    <script>
+        // --- Copy Code Button ---
+        document.querySelectorAll('pre').forEach((pre) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'code-wrapper';
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(pre);
+
+            const button = document.createElement('button');
+            button.className = 'copy-btn';
+            button.innerText = 'Copy';
+            button.addEventListener('click', () => {
+                const code = pre.querySelector('code').innerText;
+                navigator.clipboard.writeText(code);
+                button.innerText = 'Copied!';
+                button.style.color = 'var(--c-accent)';
+                setTimeout(() => {
+                    button.innerText = 'Copy';
+                    button.style.color = '';
+                }, 2000);
+            });
+            wrapper.appendChild(button);
+        });
+
+        // --- Lightbox ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+
+        document.querySelectorAll('.article-body img, .post-image img').forEach(img => {
+            img.addEventListener('click', () => {
+                lightboxImg.src = img.src;
+                lightbox.classList.add('active');
+            });
+        });
+
+        lightbox.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+        });
+
+        // --- Ghost TOC ---
+        const tocList = document.getElementById('tocList');
+        const headers = document.querySelectorAll('.article-body h2');
+        const ghostToc = document.getElementById('ghostToc');
+
+        if (headers.length > 0) {
+            headers.forEach(header => {
+                if (!header.id) {
+                    header.id = header.innerText.toLowerCase()
+                        .replace(/[^\w\s-]/g, '')
+                        .replace(/\s+/g, '-');
+                }
+
+                const li = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = '#' + header.id;
+                link.innerText = header.innerText;
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById(header.id).scrollIntoView({ behavior: 'smooth' });
+                    history.pushState(null, null, '#' + header.id);
+                });
+                li.appendChild(link);
+                tocList.appendChild(li);
+
+                // Add anchor button before header
+                const anchorBtn = document.createElement('button');
+                anchorBtn.className = 'header-anchor';
+                anchorBtn.innerText = '#';
+                anchorBtn.title = 'Copiar link da secção';
+                anchorBtn.onclick = () => {
+                    const url = window.location.origin + window.location.pathname + '#' + header.id;
+                    navigator.clipboard.writeText(url);
+                    anchorBtn.innerText = '✓';
+                    anchorBtn.style.color = 'var(--c-accent)';
+                    setTimeout(() => {
+                        anchorBtn.innerText = '#';
+                        anchorBtn.style.color = '';
+                    }, 1500);
+                };
+                header.prepend(anchorBtn);
+            });
+
+            // Ghost Timer
+            let ghostTimer;
+            function wakeGhost() {
+                ghostToc.classList.add('active-ghost');
+                clearTimeout(ghostTimer);
+            }
+            function sleepGhost() {
+                ghostTimer = setTimeout(() => {
+                    ghostToc.classList.remove('active-ghost');
+                }, 5000);
+            }
+            ghostToc.addEventListener('mouseenter', wakeGhost);
+            ghostToc.addEventListener('mouseleave', sleepGhost);
+            sleepGhost();
+        } else {
+            ghostToc.style.display = 'none';
+        }
+
+        // --- Share Links ---
+        const currentUrl = encodeURIComponent(window.location.href);
+        const currentTitle = encodeURIComponent(document.title);
+        document.getElementById('shareX').href = `https://twitter.com/intent/tweet?text=${currentTitle}&url=${currentUrl}`;
+        document.getElementById('shareLn').href = `https://www.linkedin.com/sharing/share-offsite/?url=${currentUrl}`;
+
+        document.getElementById('mainCopyBtn').addEventListener('click', function () {
+            navigator.clipboard.writeText(window.location.href);
+            this.innerText = 'Copiado!';
+            this.style.borderColor = 'var(--c-accent)';
+            this.style.color = 'var(--c-accent)';
+            setTimeout(() => {
+                this.innerText = 'Copiar Link';
+                this.style.borderColor = '';
+                this.style.color = '';
+            }, 2000);
+        });
+    </script>
+</body>
+
+</html>

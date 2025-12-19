@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<rss version="2.0">
+  <channel>
+    <title>zero()</title>
+    <link>https://mefrraz.github.io/zero</link>
+    <description>Blog pessoal sobre tecnologia, Linux e programação</description>
+    <language>pt-PT</language>
+    <item>
+      <title>Dotfiles: A Arte de Versionar o Teu Sistema</title>
+      <link>https://mefrraz.github.io/zero/posts/dotfiles-versionar-configuracoes.html</link>
+      <description>As tuas configurações são código. Trata-as como tal. Um guia completo para gerir dotfiles com Git.</description>
+      <pubDate>Fri, 19 Dec 2025 00:00:00 GMT</pubDate>
+      <guid>https://mefrraz.github.io/zero/posts/dotfiles-versionar-configuracoes.html</guid>
+    </item>
+    <item>
+      <title>Tmux: O Terminal Dentro do Terminal</title>
+      <link>https://mefrraz.github.io/zero/posts/tmux-multiplexar-terminal.html</link>
+      <description>Porque é que um terminal não chega. Guia completo do tmux: desde os fundamentos até configurações avançadas.</description>
+      <pubDate>Fri, 19 Dec 2025 00:00:00 GMT</pubDate>
+      <guid>https://mefrraz.github.io/zero/posts/tmux-multiplexar-terminal.html</guid>
+    </item>
+    <item>
+      <title>O Culto da Produtividade: Uma Crítica</title>
+      <link>https://mefrraz.github.io/zero/posts/culto-produtividade-digital.html</link>
+      <description>Quando a obsessão por ser produtivo se torna a maior distração. Reflexões sobre a armadilha da optimização infinita.</description>
+      <pubDate>Fri, 19 Dec 2025 00:00:00 GMT</pubDate>
+      <guid>https://mefrraz.github.io/zero/posts/culto-produtividade-digital.html</guid>
+    </item>
+    <item>
+      <title>Como Wayland Finalmente Conquistou o Desktop Linux</title>
+      <link>https://mefrraz.github.io/zero/posts/wayland-conquistou-desktop.html</link>
+      <description>Depois de anos de desenvolvimento, o Wayland está pronto para uso diário. Aqui está o porquê.</description>
+      <pubDate>Tue, 16 Dec 2025 00:00:00 GMT</pubDate>
+      <guid>https://mefrraz.github.io/zero/posts/wayland-conquistou-desktop.html</guid>
+    </item>
+  </channel>
+</rss>

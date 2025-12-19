@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Rebase Interativo: A Arte de Reescrever a História - zero()</title>
+    <meta name="description" content="Commits desarrumados não têm de ficar assim. O rebase interativo é a tua ferramenta de edição da história.">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>0</text></svg>">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+    <!-- Prism.js for Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" defer></script>
+</head>
+
+<body>
+    <div class="bg-layer">
+        <img src="../assets/1.png" alt="" class="bg-blob blob-1">
+        <img src="../assets/2.png" alt="" class="bg-blob blob-2">
+        <img src="../assets/3.png" alt="" class="bg-blob blob-3">
+    </div>
+
+    <div class="container">
+        <div id="header-placeholder"></div>
+        <script src="../components.js"></script>
+        <script>loadHeader();</script>
+
+
+        <!-- Article Header -->
+        <header class="post-hero">
+            <div class="post-hero-meta">
+                <a href="javascript:history.back()" class="back-link">← Voltar</a>
+                <span class="meta-dot">•</span>
+                <a href="../categories/category-git.html" class="post-category">Git</a>
+                <span class="meta-dot">•</span>
+                <span class="post-date">18 Dez 2025</span>
+                <span class="meta-dot">•</span>
+                <span class="reading-time">5 min de leitura</span>
+            </div>
+            <h1 class="post-hero-title">Git Rebase Interativo: A Arte de Reescrever a História</h1>
+            <p class="post-hero-excerpt">Commits desarrumados não têm de ficar assim. O rebase interativo é a tua ferramenta de edição da história.</p>
+        </header>
+
+        <!-- Article Content -->
+        <main class="article-container">
+            <article class="article-body">
+                <p>O Git é uma máquina do tempo. E como qualquer viajante temporal responsável, deves saber que a história pode ser reescrita — desde que ninguém a tenha visto ainda.</p>
+<p>O <code>git rebase -i</code> (interativo) é a tua ferramenta de edição. Permite reorganizar, combinar, editar, ou eliminar commits antes de os partilhares.</p>
+<h2 id="porque-reescrever">Porquê Reescrever?</h2>
+<p>Imagina este histórico durante o desenvolvimento:</p>
+<pre class="codehilite"><code>3a5f2c1 fix typo
+b2e8d4f fix another typo
+1c7a3e2 WIP: trying something
+8d4b2a9 Add user authentication
+f1e6c8d forgot to add file
+5a2b7c3 Initial commit
+</code></pre>
+
+<p>Isto é normal quando estás a trabalhar. Mas antes de fazer <code>push</code> para a branch principal ou abrir um PR, podes (e deves) limpar:</p>
+<pre class="codehilite"><code>a1b2c3d Add user authentication
+5a2b7c3 Initial commit
+</code></pre>
+
+<p>Limpo. Legível. Conta uma história clara.</p>
+<h2 id="o-basico-como-iniciar">O Básico: Como Iniciar</h2>
+<pre class="codehilite"><code class="language-bash"># Rebase interativo dos últimos 5 commits
+git rebase -i HEAD~5
+
+# Ou desde um commit específico
+git rebase -i abc123
+
+# Ou desde a base de uma branch
+git rebase -i main
+</code></pre>
+
+<p>O Git abre o teu editor com algo assim:</p>
+<pre class="codehilite"><code>pick 5a2b7c3 Initial commit
+pick 8d4b2a9 Add user authentication
+pick f1e6c8d forgot to add file
+pick 1c7a3e2 WIP: trying something
+pick b2e8d4f fix another typo
+pick 3a5f2c1 fix typo
+</code></pre>
+
+<p>Cada linha é um commit. A palavra <code>pick</code> à esquerda é o comando. É aqui que a magia acontece.</p>
+<h2 id="os-comandos">Os Comandos</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Comando</th>
+<th style="text-align: left;">Abreviação</th>
+<th style="text-align: left;">O Que Faz</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>pick</code></td>
+<td style="text-align: left;"><code>p</code></td>
+<td style="text-align: left;">Mantém o commit como está</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>reword</code></td>
+<td style="text-align: left;"><code>r</code></td>
+<td style="text-align: left;">Mantém o commit, mas edita a mensagem</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>edit</code></td>
+<td style="text-align: left;"><code>e</code></td>
+<td style="text-align: left;">Para no commit para edições</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>squash</code></td>
+<td style="text-align: left;"><code>s</code></td>
+<td style="text-align: left;">Combina com o commit anterior, junta mensagens</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fixup</code></td>
+<td style="text-align: left;"><code>f</code></td>
+<td style="text-align: left;">Combina com o anterior, descarta a mensagem</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>drop</code></td>
+<td style="text-align: left;"><code>d</code></td>
+<td style="text-align: left;">Remove o commit completamente</td>
+</tr>
+</tbody>
+</table>
+<h3 id="squash-combinar-commits">Squash: Combinar Commits</h3>
+<p>O <code>squash</code> junta um commit ao anterior, combinando as mensagens:</p>
+<pre class="codehilite"><code>pick 8d4b2a9 Add user authentication
+squash f1e6c8d forgot to add file
+squash 1c7a3e2 WIP: trying something
+</code></pre>
+
+<p>Resultado: um único commit com uma mensagem que tu decides.</p>
+<h3 id="fixup-squash-silencioso">Fixup: Squash Silencioso</h3>
+<p>O <code>fixup</code> é como o <code>squash</code>, mas descarta a mensagem do commit combinado:</p>
+<pre class="codehilite"><code>pick 8d4b2a9 Add user authentication
+fixup f1e6c8d forgot to add file
+fixup b2e8d4f fix another typo
+fixup 3a5f2c1 fix typo
+</code></pre>
+
+<p>Resultado: um único commit "Add user authentication", limpo.</p>
+<div class="callout">
+    <div class="callout-icon">&gt;</div>
+    <div class="callout-content">
+        <strong>Dica:</strong> Podes criar commits de fixup automaticamente: <code>git commit --fixup abc123</code>. Depois, <code>git rebase -i --autosquash</code> organiza-os automaticamente.
+    </div>
+</div>
+
+<h3 id="reword-apenas-editar-a-mensagem">Reword: Apenas Editar a Mensagem</h3>
+<pre class="codehilite"><code>reword 8d4b2a9 Add user authentication
+</code></pre>
+
+<p>O Git para e deixa-te editar a mensagem do commit.</p>
+<h3 id="edit-parar-para-modificacoes">Edit: Parar Para Modificações</h3>
+<pre class="codehilite"><code>edit 8d4b2a9 Add user authentication
+</code></pre>
+
+<p>O Git para neste commit. Podes:
+- Modificar ficheiros
+- Fazer <code>git add</code> 
+- <code>git commit --amend</code> para alterar o commit
+- <code>git rebase --continue</code> para prosseguir</p>
+<h3 id="reordenar-commits">Reordenar Commits</h3>
+<p>Simplesmente muda a ordem das linhas:</p>
+<pre class="codehilite"><code># Antes
+pick a1 Commit A
+pick b2 Commit B
+pick c3 Commit C
+
+# Depois (C vem primeiro)
+pick c3 Commit C
+pick a1 Commit A
+pick b2 Commit B
+</code></pre>
+
+<h2 id="workflow-real">Workflow Real</h2>
+<p>Eis como uso o rebase interativo no dia-a-dia:</p>
+<h3 id="1-desenvolvimento-livre">1. Desenvolvimento Livre</h3>
+<p>Durante o desenvolvimento, faço commits frequentes e desarrumados:</p>
+<pre class="codehilite"><code class="language-bash">git commit -m &quot;WIP&quot;
+git commit -m &quot;fix&quot;
+git commit -m &quot;actually fix&quot;
+git commit -m &quot;add tests&quot;
+</code></pre>
+
+<h3 id="2-antes-do-push">2. Antes do Push</h3>
+<p>Limpo a história:</p>
+<pre class="codehilite"><code class="language-bash">git rebase -i main
+</code></pre>
+
+<p>Combino tudo em commits lógicos:</p>
+<pre class="codehilite"><code>pick abc123 Add user authentication
+fixup def456 WIP
+fixup ghi789 fix
+fixup jkl012 actually fix
+squash mno345 add tests
+</code></pre>
+
+<h3 id="3-mensagens-claras">3. Mensagens Claras</h3>
+<p>Aproveito o <code>reword</code> para escrever mensagens descritivas:</p>
+<pre class="codehilite"><code>feat(auth): add user authentication
+
+- Implement JWT token generation
+- Add login/logout endpoints
+- Include password hashing with bcrypt
+- Add unit tests for auth service
+</code></pre>
+
+<h2 id="quando-nao-fazer-rebase">Quando NÃO Fazer Rebase</h2>
+<div class="callout">
+    <div class="callout-icon">&gt;</div>
+    <div class="callout-content">
+        <strong>Aviso:</strong> Nunca faças rebase em commits que já partilhaste com outros. Se alguém já fez pull do teu trabalho, reescrever a história causa conflitos graves.
+    </div>
+</div>
+
+<p><strong>Regra de ouro:</strong> Rebase na tua branch local antes do push. Depois do push, merge.</p>
+<pre class="codehilite"><code class="language-bash"># Seguro: rebase antes do primeiro push
+git rebase -i main
+git push origin feature-branch
+
+# Perigoso: rebase depois de já ter feito push
+git rebase -i main
+git push --force  # Isto pode destruir trabalho de outros
+</code></pre>
+
+<p>Se precisares mesmo de forçar após rebase:</p>
+<pre class="codehilite"><code class="language-bash"># Usa force-with-lease: falha se a remote mudou
+git push --force-with-lease
+</code></pre>
+
+<h2 id="resolver-conflitos-durante-rebase">Resolver Conflitos Durante Rebase</h2>
+<p>Se houver conflitos:</p>
+<pre class="codehilite"><code class="language-bash"># 1. Resolve os conflitos nos ficheiros
+# 2. Marca como resolvido
+git add ficheiro-resolvido.py
+
+# 3. Continua o rebase
+git rebase --continue
+
+# Ou aborta se algo correr mal
+git rebase --abort
+</code></pre>
+
+<h2 id="configuracoes-uteis">Configurações Úteis</h2>
+<pre class="codehilite"><code class="language-bash"># Editor para rebase (vim, code, nano...)
+git config --global core.editor &quot;vim&quot;
+
+# Rebase automático em pull
+git config --global pull.rebase true
+
+# Autosquash por defeito
+git config --global rebase.autoSquash true
+</code></pre>
+
+<h2 id="conclusao">Conclusão</h2>
+<p>O <code>git rebase -i</code> é uma das ferramentas mais poderosas do Git. Permite-te:</p>
+<ul>
+<li>Manter históricos limpos e legíveis</li>
+<li>Contar uma história clara do desenvolvimento</li>
+<li>Corrigir erros antes de os partilhares</li>
+</ul>
+<p>Trabalha desarrumado. Commita frequentemente. Mas antes de partilhares, limpa a história.</p>
+<p>O Git é uma máquina do tempo. Usa-a responsavelmente.</p>
+            </article>
+
+            <!-- Tags -->
+            <div class="post-tags">
+                <span class="tag">git</span>
+<span class="tag">rebase</span>
+<span class="tag">workflow</span>
+<span class="tag">versionamento</span>
+            </div>
+
+            <!-- Share Section -->
+            <div class="share-section">
+                <span class="share-label">Partilhar:</span>
+                <a href="#" id="shareX" target="_blank" class="share-btn">X</a>
+                <a href="#" id="shareLn" target="_blank" class="share-btn">LinkedIn</a>
+                <button id="mainCopyBtn" class="share-btn share-copy">Copiar Link</button>
+            </div>
+
+            <!-- Post Navigation -->
+            <nav class="post-nav">
+                                <a href="minimalismo-digital-pratico.html" class="post-nav-link prev">
+                    <span class="nav-label">← Anterior</span>
+                    <span class="nav-title">Minimalismo Digital: Menos Software, Mais Foco</span>
+                </a>                <a href="docker-multi-stage-builds.html" class="post-nav-link next">
+                    <span class="nav-label">Próximo →</span>
+                    <span class="nav-title">Docker Multi-Stage Builds: Porque o Peso Importa</span>
+                </a>
+            </nav>
+        </main>
+
+        <div id="footer-placeholder"></div>
+        <script>loadFooter();</script>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox-overlay" id="lightbox">
+        <img src="" alt="Zoomed Image" class="lightbox-img" id="lightboxImg">
+    </div>
+
+    <!-- Ghost TOC -->
+    <div class="ghost-toc" id="ghostToc">
+        <h3>Índice</h3>
+        <ul id="tocList"></ul>
+    </div>
+
+    <style>
+        /* === BACK LINK === */
+        .back-link {
+            color: var(--c-text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--c-accent);
+        }
+
+        /* === POST HERO === */
+        .post-hero {
+            padding: 4rem 0 3rem;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 4rem;
+        }
+
+        .post-hero-meta {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .post-category {
+            color: var(--c-text-sub);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .post-category:hover {
+            color: var(--c-accent);
+        }
+
+        .meta-dot {
+            color: var(--c-text-sub);
+            opacity: 0.3;
+        }
+
+        .post-date,
+        .reading-time {
+            color: var(--c-text-sub);
+        }
+
+        .post-hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .post-hero-excerpt {
+            font-size: 1.25rem;
+            color: var(--c-text-sub);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        .post-author {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .author-label {
+            color: var(--c-text-sub);
+        }
+
+        .author-name {
+            color: var(--c-text-main);
+            font-weight: 600;
+        }
+
+        /* === ARTICLE BODY === */
+        .article-container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding-bottom: 4rem;
+        }
+
+        .article-body {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: var(--c-text-main);
+        }
+
+        .article-body p {
+            margin-bottom: 1.75rem;
+        }
+
+        .article-body p.lead {
+            font-size: 1.35rem;
+            color: var(--c-text-sub);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .article-body h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 3.5rem;
+            margin-bottom: 1.25rem;
+            color: var(--c-text-main);
+            position: relative;
+            padding-left: 1rem;
+            border-left: 3px solid var(--c-accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-anchor {
+            background: none;
+            border: none;
+            color: var(--c-text-sub);
+            opacity: 0;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            padding: 0.25rem;
+            transition: all 0.2s;
+            order: -1;
+            margin-left: -0.25rem;
+            margin-right: 0.25rem;
+        }
+
+        .article-body h2:hover .header-anchor {
+            opacity: 1;
+        }
+
+        .header-anchor:hover {
+            color: var(--c-accent);
+        }
+
+        /* === IMAGES === */
+        .post-image {
+            margin: 2.5rem 0;
+            text-align: center;
+        }
+
+        .post-image img {
+            max-width: 100%;
+            border-radius: 8px;
+            cursor: zoom-in;
+        }
+
+        .post-image figcaption {
+            font-size: 0.85rem;
+            color: var(--c-text-sub);
+            margin-top: 0.75rem;
+            font-style: italic;
+        }
+
+        /* === BLOCKQUOTE === */
+        .article-body blockquote {
+            border-left: 3px solid var(--c-accent);
+            padding: 1.5rem 2rem;
+            margin: 2.5rem 0;
+            background: var(--c-accent-subtle);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .article-body blockquote p {
+            font-size: 1.2rem;
+            font-style: italic;
+            color: var(--c-text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .article-body blockquote cite {
+            font-size: 0.9rem;
+            color: var(--c-text-sub);
+            font-style: normal;
+        }
+
+        /* === CALLOUT === */
+        .callout {
+            display: flex;
+            gap: 1rem;
+            padding: 1.25rem 1.5rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+            background: var(--c-accent-subtle);
+            border: 1px solid var(--c-accent-soft);
+        }
+
+        .callout-icon {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--c-accent);
+            flex-shrink: 0;
+        }
+
+        .callout-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* === CODE === */
+        .article-body code {
+            font-family: var(--font-mono);
+            background: rgba(255, 255, 255, 0.08);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: var(--c-accent);
+        }
+
+        .article-body pre {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+
+        .article-body pre code {
+            background: transparent;
+            padding: 0;
+            color: #f8f8f2;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Light mode code blocks - match terminal from /projetos */
+        [data-theme="light"] .article-body pre {
+            background: #f3f4f6 !important;
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .article-body pre[class*="language-"] {
+            background: #f3f4f6 !important;
+        }
+
+        [data-theme="light"] .article-body code {
+            background: rgba(0, 0, 0, 0.08);
+            color: var(--c-accent);
+        }
+
+        [data-theme="light"] .article-body pre code {
+            background: transparent;
+            color: var(--c-text-main);
+        }
+
+        /* Override Prism.js colors for light mode */
+        [data-theme="light"] .token.comment,
+        [data-theme="light"] .token.prolog,
+        [data-theme="light"] .token.doctype,
+        [data-theme="light"] .token.cdata {
+            color: var(--c-text-sub);
+        }
+
+        [data-theme="light"] .token.punctuation {
+            color: var(--c-text-main);
+        }
+
+        [data-theme="light"] .token.property,
+        [data-theme="light"] .token.tag,
+        [data-theme="light"] .token.boolean,
+        [data-theme="light"] .token.number,
+        [data-theme="light"] .token.constant,
+        [data-theme="light"] .token.symbol {
+            color: var(--c-accent);
+        }
+
+        [data-theme="light"] .token.selector,
+        [data-theme="light"] .token.attr-name,
+        [data-theme="light"] .token.string,
+        [data-theme="light"] .token.char,
+        [data-theme="light"] .token.builtin {
+            color: #2e7d32;
+        }
+
+        [data-theme="light"] .token.operator,
+        [data-theme="light"] .token.entity,
+        [data-theme="light"] .token.url,
+        [data-theme="light"] .token.variable {
+            color: var(--c-text-main);
+        }
+
+        [data-theme="light"] .token.atrule,
+        [data-theme="light"] .token.attr-value,
+        [data-theme="light"] .token.function,
+        [data-theme="light"] .token.class-name {
+            color: var(--c-accent);
+            font-weight: 600;
+        }
+
+        [data-theme="light"] .token.keyword {
+            color: #7b1fa2;
+        }
+
+        [data-theme="light"] .token.regex,
+        [data-theme="light"] .token.important {
+            color: #e65100;
+        }
+
+        /* === TAGS === */
+        .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 3rem 0 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] .post-tags {
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .tag {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--c-text-sub);
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: var(--font-mono);
+        }
+
+        [data-theme="light"] .tag {
+            background: #d1d5db;
+            color: var(--c-text-main);
+        }
+
+        /* === SHARE === */
+        .share-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 2rem 0 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] .share-section {
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .share-label {
+            color: var(--c-text-sub);
+            font-size: 0.9rem;
+        }
+
+        .share-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--c-text-sub);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .share-btn:hover {
+            border-color: var(--c-accent);
+            color: var(--c-accent);
+        }
+
+        [data-theme="light"] .share-btn {
+            border: 1px solid rgba(0, 0, 0, 0.15);
+        }
+
+        [data-theme="light"] .share-btn:hover {
+            border-color: var(--c-accent);
+            color: var(--c-accent);
+        }
+
+        /* === POST NAVIGATION === */
+        .post-nav {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        [data-theme="light"] .post-nav {
+            border-top-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .post-nav-link {
+            padding: 1.5rem;
+            background: var(--c-bg-card);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .post-nav-link:hover {
+            border-color: var(--c-accent-soft);
+            transform: translateY(-2px);
+        }
+
+        [data-theme="light"] .post-nav-link {
+            background: transparent;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .post-nav-link:hover {
+            border-color: var(--c-accent);
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .post-nav-link.next {
+            text-align: right;
+        }
+
+        .nav-label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--c-accent);
+            margin-bottom: 0.5rem;
+            font-family: var(--font-mono);
+        }
+
+        .nav-title {
+            display: block;
+            color: var(--c-text-main);
+            font-weight: 600;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .post-hero-title {
+                font-size: 2rem;
+            }
+
+            .post-hero-meta {
+                flex-wrap: wrap;
+            }
+
+            .post-nav {
+                grid-template-columns: 1fr;
+            }
+
+            .post-nav-link.next {
+                text-align: left;
+            }
+        }
+    </style>
+
+    <script>
+        // --- Copy Code Button ---
+        document.querySelectorAll('pre').forEach((pre) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'code-wrapper';
+            pre.parentNode.insertBefore(wrapper, pre);
+            wrapper.appendChild(pre);
+
+            const button = document.createElement('button');
+            button.className = 'copy-btn';
+            button.innerText = 'Copy';
+            button.addEventListener('click', () => {
+                const code = pre.querySelector('code').innerText;
+                navigator.clipboard.writeText(code);
+                button.innerText = 'Copied!';
+                button.style.color = 'var(--c-accent)';
+                setTimeout(() => {
+                    button.innerText = 'Copy';
+                    button.style.color = '';
+                }, 2000);
+            });
+            wrapper.appendChild(button);
+        });
+
+        // --- Lightbox ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+
+        document.querySelectorAll('.article-body img, .post-image img').forEach(img => {
+            img.addEventListener('click', () => {
+                lightboxImg.src = img.src;
+                lightbox.classList.add('active');
+            });
+        });
+
+        lightbox.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+        });
+
+        // --- Ghost TOC ---
+        const tocList = document.getElementById('tocList');
+        const headers = document.querySelectorAll('.article-body h2');
+        const ghostToc = document.getElementById('ghostToc');
+
+        if (headers.length > 0) {
+            headers.forEach(header => {
+                if (!header.id) {
+                    header.id = header.innerText.toLowerCase()
+                        .replace(/[^\w\s-]/g, '')
+                        .replace(/\s+/g, '-');
+                }
+
+                const li = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = '#' + header.id;
+                link.innerText = header.innerText;
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById(header.id).scrollIntoView({ behavior: 'smooth' });
+                    history.pushState(null, null, '#' + header.id);
+                });
+                li.appendChild(link);
+                tocList.appendChild(li);
+
+                // Add anchor button before header
+                const anchorBtn = document.createElement('button');
+                anchorBtn.className = 'header-anchor';
+                anchorBtn.innerText = '#';
+                anchorBtn.title = 'Copiar link da secção';
+                anchorBtn.onclick = () => {
+                    const url = window.location.origin + window.location.pathname + '#' + header.id;
+                    navigator.clipboard.writeText(url);
+                    anchorBtn.innerText = '✓';
+                    anchorBtn.style.color = 'var(--c-accent)';
+                    setTimeout(() => {
+                        anchorBtn.innerText = '#';
+                        anchorBtn.style.color = '';
+                    }, 1500);
+                };
+                header.prepend(anchorBtn);
+            });
+
+            // Ghost Timer
+            let ghostTimer;
+            function wakeGhost() {
+                ghostToc.classList.add('active-ghost');
+                clearTimeout(ghostTimer);
+            }
+            function sleepGhost() {
+                ghostTimer = setTimeout(() => {
+                    ghostToc.classList.remove('active-ghost');
+                }, 5000);
+            }
+            ghostToc.addEventListener('mouseenter', wakeGhost);
+            ghostToc.addEventListener('mouseleave', sleepGhost);
+            sleepGhost();
+        } else {
+            ghostToc.style.display = 'none';
+        }
+
+        // --- Share Links ---
+        const currentUrl = encodeURIComponent(window.location.href);
+        const currentTitle = encodeURIComponent(document.title);
+        document.getElementById('shareX').href = `https://twitter.com/intent/tweet?text=${currentTitle}&url=${currentUrl}`;
+        document.getElementById('shareLn').href = `https://www.linkedin.com/sharing/share-offsite/?url=${currentUrl}`;
+
+        document.getElementById('mainCopyBtn').addEventListener('click', function () {
+            navigator.clipboard.writeText(window.location.href);
+            this.innerText = 'Copiado!';
+            this.style.borderColor = 'var(--c-accent)';
+            this.style.color = 'var(--c-accent)';
+            setTimeout(() => {
+                this.innerText = 'Copiar Link';
+                this.style.borderColor = '';
+                this.style.color = '';
+            }, 2000);
+        });
+    </script>
+</body>
+
+</html>

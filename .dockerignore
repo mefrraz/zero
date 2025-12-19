@@ -1,0 +1,12 @@
+.git
+.gitignore
+.venv
+__pycache__
+posts/*.html
+categories/*.html
+blog.html
+index.html
+feed.xml
+sitemap.xml
+.github
+README*
